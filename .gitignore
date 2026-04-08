@@ -1,0 +1,41 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Kotlin / IntelliJ
+.idea/
+*.iml
+out/
+
+# Android
+local.properties
+captures/
+*.apk
+*.aab
+
+# iOS / Xcode
+DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Kotlin Multiplatform / Native
+*.kotlin_metadata
+konan/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-data/
+postgres_data/
+
+# OS
+.DS_Store
+Thumbs.db
