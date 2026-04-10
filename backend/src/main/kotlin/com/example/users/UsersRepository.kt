@@ -1,6 +1,6 @@
 package com.example.users
 
-import com.example.db.UsersTable
+import com.example.db.tables.UsersTable
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
