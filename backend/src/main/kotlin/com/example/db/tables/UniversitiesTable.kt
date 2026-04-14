@@ -8,8 +8,7 @@ object UniversitiesTable : Table("universities") {
     val name = text("name").uniqueIndex()
     val slug = text("slug").uniqueIndex()
     val cityId = uuid("city_id")
-        .nullable()
         .references(CitiesTable.id, onDelete = ReferenceOption.SET_NULL, onUpdate = ReferenceOption.CASCADE)
-
+        .nullable()
     override val primaryKey = PrimaryKey(id)
 }

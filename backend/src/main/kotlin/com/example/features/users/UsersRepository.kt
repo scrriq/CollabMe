@@ -1,4 +1,4 @@
-package com.example.users
+package com.example.features.users
 
 import com.example.db.tables.UsersTable
 import org.jetbrains.exposed.sql.selectAll

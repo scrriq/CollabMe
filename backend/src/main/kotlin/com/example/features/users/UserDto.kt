@@ -1,4 +1,4 @@
-package com.example.users
+package com.example.features.users
 
 import kotlinx.serialization.Serializable
 

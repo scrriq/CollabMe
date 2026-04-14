@@ -7,8 +7,8 @@ object ThemesTable : Table("themes") {
     val id = uuid("id")
     val name = text("name")
     val directionId = uuid("direction_id")
-        .nullable()
         .references(DirectionsTable.id, onDelete = ReferenceOption.SET_NULL, onUpdate = ReferenceOption.CASCADE)
+        .nullable()
 
     override val primaryKey = PrimaryKey(id)
 }
