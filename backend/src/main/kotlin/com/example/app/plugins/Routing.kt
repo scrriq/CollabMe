@@ -9,6 +9,10 @@ import com.example.features.applications.ApplicationsService
 import com.example.features.applicationstatuses.ApplicationStatusesRepository
 import com.example.features.applicationstatuses.ApplicationStatusesRoutes
 import com.example.features.applicationstatuses.ApplicationStatusesService
+import com.example.features.auth.AuthRepository
+import com.example.features.auth.AuthRoutes
+import com.example.features.auth.AuthService
+import com.example.features.auth.JwtTokenService
 import com.example.features.cities.CitiesRepository
 import com.example.features.cities.CitiesRoutes
 import com.example.features.cities.CitiesService
@@ -34,6 +38,10 @@ import io.ktor.server.application.Application
 import io.ktor.server.routing.routing
 
 fun Application.configureRouting() {
+    val jwtConfig = jwtConfig()
+    val authRepository = AuthRepository()
+    val jwtTokenService = JwtTokenService(jwtConfig)
+    val authService = AuthService(authRepository, jwtTokenService, jwtConfig.accessTokenTtlSeconds)
     val citiesRepository = CitiesRepository()
     val citiesService = CitiesService(citiesRepository)
     val directionsRepository = DirectionsRepository()
@@ -56,6 +64,7 @@ fun Application.configureRouting() {
     val usersService = UsersService(usersRepository)
 
     routing {
+        AuthRoutes(authService)
         CitiesRoutes(citiesService)
         DirectionsRoutes(directionsService)
         SkillsRoutes(skillsService)

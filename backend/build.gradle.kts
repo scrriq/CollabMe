@@ -23,6 +23,8 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation-jvm:2.3.12")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:2.3.12")
     implementation("io.ktor:ktor-server-status-pages-jvm:2.3.12")
+    implementation("io.ktor:ktor-server-auth-jvm:2.3.12")
+    implementation("io.ktor:ktor-server-auth-jwt-jvm:2.3.12")
 
     // DB: Hikari + PostgreSQL + Exposed
     implementation("com.zaxxer:HikariCP:5.1.0")
@@ -34,6 +36,7 @@ dependencies {
 
     // Logging
     implementation("ch.qos.logback:logback-classic:1.5.6")
+    implementation("org.mindrot:jbcrypt:0.4")
 
     testImplementation(kotlin("test"))
 }
