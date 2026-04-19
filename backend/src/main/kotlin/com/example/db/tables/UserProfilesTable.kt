@@ -1,5 +1,6 @@
 package com.example.db.tables
 
+import com.example.db.jsonb
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.date
@@ -21,7 +22,7 @@ object UserProfilesTable : Table("user_profiles") {
         .nullable()
     val about = text("about").nullable()
     val avatarUrl = text("avatar_url").nullable()
-    val socialLinks = text("social_links")
+    val socialLinks = jsonb("social_links")
     val updatedAt = timestampWithTimeZone("updated_at")
 
     override val primaryKey = PrimaryKey(userId)
