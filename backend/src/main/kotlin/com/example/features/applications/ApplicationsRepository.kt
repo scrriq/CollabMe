@@ -1,31 +1,144 @@
 package com.example.features.applications
 
 import com.example.db.tables.ApplicationsTable
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 class ApplicationsRepository {
-    fun findById(id: UUID): ApplicationDto? = transaction {
+
+    fun listVisible(userId: UUID?, excludeCompleted: Boolean): List<ApplicationDto> = transaction {
         ApplicationsTable
             .selectAll()
-            .where { ApplicationsTable.id eq id }
+            .where {
+                var expr = ApplicationsTable.deletedAt.isNull()
+                if (userId != null) {
+                    expr = expr and (ApplicationsTable.userId eq userId)
+                }
+                if (excludeCompleted) {
+                    expr = expr and ApplicationsTable.completedAt.isNull()
+                }
+                expr
+            }
+            .orderBy(ApplicationsTable.createdAt to SortOrder.DESC)
+            .map(::mapRow)
+    }
+
+    fun findVisibleById(id: UUID): ApplicationDto? = transaction {
+        ApplicationsTable
+            .selectAll()
+            .where {
+                (ApplicationsTable.id eq id) and ApplicationsTable.deletedAt.isNull()
+            }
             .limit(1)
             .singleOrNull()
-            ?.let { row ->
-                ApplicationDto(
-                    id = row[ApplicationsTable.id].toString(),
-                    userId = row[ApplicationsTable.userId].toString(),
-                    themeId = row[ApplicationsTable.themeId].toString(),
-                    kindId = row[ApplicationsTable.kindId].toString(),
-                    statusId = row[ApplicationsTable.statusId].toString(),
-                    title = row[ApplicationsTable.title],
-                    description = row[ApplicationsTable.description],
-                    createdAt = row[ApplicationsTable.createdAt].toString(),
-                    updatedAt = row[ApplicationsTable.updatedAt].toString(),
-                    archivedAt = row[ApplicationsTable.archivedAt]?.toString(),
-                    completedAt = row[ApplicationsTable.completedAt]?.toString(),
-                )
-            }
+            ?.let(::mapRow)
     }
+
+    fun findVisibleByIdAndUserId(id: UUID, userId: UUID): ApplicationDto? = transaction {
+        ApplicationsTable
+            .selectAll()
+            .where {
+                (ApplicationsTable.id eq id) and
+                    (ApplicationsTable.userId eq userId) and
+                    ApplicationsTable.deletedAt.isNull()
+            }
+            .limit(1)
+            .singleOrNull()
+            ?.let(::mapRow)
+    }
+
+    fun insert(
+        id: UUID,
+        userId: UUID,
+        themeId: UUID,
+        kindId: UUID,
+        statusId: UUID,
+        title: String,
+        description: String,
+        completedAt: OffsetDateTime?,
+    ): ApplicationDto = transaction {
+        val now = OffsetDateTime.now(ZoneOffset.UTC)
+        ApplicationsTable.insert {
+            it[ApplicationsTable.id] = id
+            it[ApplicationsTable.userId] = userId
+            it[ApplicationsTable.themeId] = themeId
+            it[ApplicationsTable.kindId] = kindId
+            it[ApplicationsTable.statusId] = statusId
+            it[ApplicationsTable.title] = title
+            it[ApplicationsTable.description] = description
+            it[ApplicationsTable.createdAt] = now
+            it[ApplicationsTable.updatedAt] = now
+            it[ApplicationsTable.deletedAt] = null
+            it[ApplicationsTable.completedAt] = completedAt
+        }
+        findVisibleByIdAndUserId(id, userId)!!
+    }
+
+    fun patch(
+        id: UUID,
+        userId: UUID,
+        themeId: UUID?,
+        kindId: UUID?,
+        statusId: UUID?,
+        title: String?,
+        description: String?,
+        completedAt: OffsetDateTime?,
+        touchCompletedAt: Boolean,
+    ): ApplicationDto? = transaction {
+        val updated = ApplicationsTable.update(
+            where = {
+                (ApplicationsTable.id eq id) and
+                    (ApplicationsTable.userId eq userId) and
+                    ApplicationsTable.deletedAt.isNull()
+            },
+        ) {
+            themeId?.let { tid -> it[ApplicationsTable.themeId] = tid }
+            kindId?.let { kid -> it[ApplicationsTable.kindId] = kid }
+            statusId?.let { sid -> it[ApplicationsTable.statusId] = sid }
+            title?.let { t -> it[ApplicationsTable.title] = t }
+            description?.let { d -> it[ApplicationsTable.description] = d }
+            if (touchCompletedAt) {
+                it[ApplicationsTable.completedAt] = completedAt
+            }
+        }
+        if (updated == 0) null else findVisibleByIdAndUserId(id, userId)
+    }
+
+    fun softDelete(id: UUID, userId: UUID): Boolean = transaction {
+        val now = OffsetDateTime.now(ZoneOffset.UTC)
+        val n = ApplicationsTable.update(
+            where = {
+                (ApplicationsTable.id eq id) and
+                    (ApplicationsTable.userId eq userId) and
+                    ApplicationsTable.deletedAt.isNull()
+            },
+        ) {
+            it[ApplicationsTable.deletedAt] = now
+        }
+        n > 0
+    }
+
+    private fun mapRow(row: ResultRow): ApplicationDto =
+        ApplicationDto(
+            id = row[ApplicationsTable.id].toString(),
+            userId = row[ApplicationsTable.userId].toString(),
+            themeId = row[ApplicationsTable.themeId].toString(),
+            kindId = row[ApplicationsTable.kindId].toString(),
+            statusId = row[ApplicationsTable.statusId].toString(),
+            title = row[ApplicationsTable.title],
+            description = row[ApplicationsTable.description],
+            createdAt = row[ApplicationsTable.createdAt].toString(),
+            updatedAt = row[ApplicationsTable.updatedAt].toString(),
+            completedAt = row[ApplicationsTable.completedAt]?.toString(),
+            deletedAt = row[ApplicationsTable.deletedAt]?.toString(),
+        )
 }

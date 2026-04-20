@@ -81,7 +81,7 @@ CREATE TABLE applications (
     description TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    archived_at TIMESTAMPTZ NULL,
+    deleted_at TIMESTAMPTZ NULL,
     completed_at TIMESTAMPTZ NULL
 );
 
@@ -116,6 +116,7 @@ CREATE INDEX idx_applications_user_id ON applications(user_id);
 CREATE INDEX idx_applications_theme_id ON applications(theme_id);
 CREATE INDEX idx_applications_kind_id ON applications(kind_id);
 CREATE INDEX idx_applications_status_id ON applications(status_id);
+CREATE INDEX idx_applications_deleted_at ON applications(deleted_at);
 
 
 

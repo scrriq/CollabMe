@@ -18,7 +18,9 @@ object ApplicationsTable : Table("applications") {
     val description = text("description")
     val createdAt = timestampWithTimeZone("created_at")
     val updatedAt = timestampWithTimeZone("updated_at")
-    val archivedAt = timestampWithTimeZone("archived_at").nullable()
+    /** Soft delete (скрыта с основных экранов). */
+    val deletedAt = timestampWithTimeZone("deleted_at").nullable()
+    /** «Долгий ящик» / завершение сценария без удаления записи. */
     val completedAt = timestampWithTimeZone("completed_at").nullable()
 
     override val primaryKey = PrimaryKey(id)

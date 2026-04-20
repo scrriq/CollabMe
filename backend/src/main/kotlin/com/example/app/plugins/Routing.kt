@@ -59,7 +59,12 @@ fun Application.configureRouting() {
     val userProfilesRepository = UserProfilesRepository()
     val userProfilesService = UserProfilesService(userProfilesRepository)
     val applicationsRepository = ApplicationsRepository()
-    val applicationsService = ApplicationsService(applicationsRepository)
+    val applicationsService = ApplicationsService(
+        applicationsRepository = applicationsRepository,
+        themesRepository = themesRepository,
+        applicationKindsRepository = applicationKindsRepository,
+        applicationStatusesRepository = applicationStatusesRepository,
+    )
     val usersRepository = UsersRepository()
     val usersService = UsersService(usersRepository)
 

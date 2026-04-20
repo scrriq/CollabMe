@@ -13,6 +13,6 @@ data class ApplicationDto(
     val description: String,
     val createdAt: String,
     val updatedAt: String,
-    val archivedAt: String? = null,
     val completedAt: String? = null,
+    val deletedAt: String? = null,
 )
