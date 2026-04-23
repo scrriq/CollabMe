@@ -8,11 +8,24 @@ build/
 *.iml
 out/
 
-# Android
+# Android / Jetpack Compose (Gradle project under frontend/)
 local.properties
 captures/
 *.apk
 *.aab
+.cxx/
+.externalNativeBuild/
+*.hprof
+.navigation/
+*.dex
+*.ap_
+
+# Kotlin / Android Studio (K2, caches)
+.kotlin/
+
+# Release signing (never commit keys)
+*.jks
+*.keystore
 
 # iOS / Xcode
 DerivedData/
