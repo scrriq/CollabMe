@@ -11,37 +11,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.collabmefrontend.presentation.login.LoginViewModel
+import com.example.collabmefrontend.presentation.navigation.AppNavigation
+import com.example.collabmefrontend.presentation.register.RegisterViewModel
 import com.example.collabmefrontend.ui.theme.CollabMeFrontendTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val loginViewModel = LoginViewModel()
+        val registerViewModel = RegisterViewModel()
         setContent {
-            CollabMeFrontendTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            AppNavigation(
+                loginViewModel = loginViewModel,
+                registerViewModel = registerViewModel
+            )
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CollabMeFrontendTheme {
-        Greeting("Android")
     }
 }
