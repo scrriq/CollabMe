@@ -1,19 +1,20 @@
 package com.example.collabmefrontend.presentation.register
 
-import androidx.compose.runtime.mutableStateOf
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.collabmefrontend.data.remote.api.ApiException
+import com.example.collabmefrontend.data.repository.AuthRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 
 class RegisterViewModel(
-
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(RegisterState())
     val state: StateFlow<RegisterState> = _state.asStateFlow()
@@ -60,11 +61,21 @@ class RegisterViewModel(
             _state.value = current.copy(isLoading = true, error = null)
 
             try{
-                // запрос в репозиторий
+                authRepository.register(
+                    login = current.login.trim(),
+                    email = current.email.trim(),
+                    password = current.password,
+                    phone = current.phone.trim().takeIf { it.isNotBlank() }
+                )
                 _state.value = _state.value.copy(isLoading = false)
                 sendEffect(RegisterEffect.NavigateToProfile)
-            } // реализовать e: AuthException
-            catch (e: Exception){
+            } catch (e: ApiException) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Request failed"
+                )
+            } catch (e: Exception){
+                Log.d("AuthErrorDebug", e.toString())
                 _state.value = _state.value.copy(
                     isLoading = false,
                     error = "Unexpected error"

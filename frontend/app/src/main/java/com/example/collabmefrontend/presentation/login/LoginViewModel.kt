@@ -1,10 +1,9 @@
 package com.example.collabmefrontend.presentation.login
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.collabmefrontend.data.remote.api.ApiException
+import com.example.collabmefrontend.data.repository.AuthRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +13,9 @@ import kotlinx.coroutines.launch
 
 
 // в дальнейшем в LoginViewModel параметром необходимо будет передавать репощиторий
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     val _state = MutableStateFlow(LoginState())
     val state: StateFlow<LoginState> = _state.asStateFlow()
@@ -40,21 +41,29 @@ class LoginViewModel : ViewModel() {
 
     private fun submit() {
         viewModelScope.launch {
-            val _current = _state.value
+            val current = _state.value
 
-            if(_current.login.isBlank() || _current.password.isBlank()){
-                _state.value = _current.copy(error = "Login and password are required")
+            if(current.login.isBlank() || current.password.isBlank()){
+                _state.value = current.copy(error = "Login and password are required")
                 return@launch
             }
 
-            _state.value = _current.copy(isLoading = true, error = null)
+            _state.value = current.copy(isLoading = true, error = null)
 
             // в дальнейшем необходимо реализовать обработчик e: AuthException с выводом ошибки
             try{
-                // необходимо в дальнейшем реализовать запрос в репозиторий
+                authRepository.login(
+                    login = current.login.trim(),
+                    password = current.password
+                )
                 _state.value = _state.value.copy(isLoading = false)
                 sendEffect(LoginEffect.NavigateToProfile)
-            }catch (e: Exception){
+            } catch (e: ApiException) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Request failed"
+                )
+            } catch (e: Exception){
                 _state.value = _state.value.copy(
                     isLoading = false,
                     error = "Unexpected error"

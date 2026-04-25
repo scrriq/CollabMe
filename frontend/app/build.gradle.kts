@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -40,6 +41,22 @@ android {
 }
 
 dependencies {
+    // --- Ktor client ---
+    //noinspection UseTomlInstead
+    implementation("io.ktor:ktor-client-core:3.4.3")
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
+
+    // --- Serialization ---
+    implementation(libs.kotlinx.serialization.json)
+
+
+    // --- DataStore (для хранения токена) ---
+    implementation(libs.androidx.datastore.preferences)
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
