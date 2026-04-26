@@ -14,10 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.collabmefrontend.core.network.ApiClient
 import com.example.collabmefrontend.data.remote.api.AuthApi
+import com.example.collabmefrontend.data.remote.api.ProfileApi
 import com.example.collabmefrontend.data.repository.RemoteAuthRepository
+import com.example.collabmefrontend.data.repository.RemoteProfileRepository
 import com.example.collabmefrontend.data.storage.TokenStorage
 import com.example.collabmefrontend.presentation.login.LoginViewModel
 import com.example.collabmefrontend.presentation.navigation.AppNavigation
+import com.example.collabmefrontend.presentation.profile.ProfileViewModel
 import com.example.collabmefrontend.presentation.register.RegisterViewModel
 import com.example.collabmefrontend.ui.theme.CollabMeFrontendTheme
 
@@ -38,11 +41,20 @@ class MainActivity : ComponentActivity() {
                     tokenStorage = tokenStorage
                 )
             }
+
+            val profileRepository = remember {
+                RemoteProfileRepository(
+                    api = ProfileApi(httpClient),
+                    tokenStorage = tokenStorage
+                )
+            }
             val loginViewModel = remember { LoginViewModel(authRepository) }
             val registerViewModel = remember { RegisterViewModel(authRepository) }
+            val profileViewModel = remember { ProfileViewModel(profileRepository, authRepository) }
             AppNavigation(
                 loginViewModel = loginViewModel,
-                registerViewModel = registerViewModel
+                registerViewModel = registerViewModel,
+                profileViewModel = profileViewModel
             )
         }
     }

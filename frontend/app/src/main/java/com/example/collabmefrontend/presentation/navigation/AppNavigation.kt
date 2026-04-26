@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.collabme.presentation.auth.login.LoginScreen
 import com.example.collabmefrontend.presentation.login.LoginViewModel
 import com.example.collabmefrontend.presentation.profile.ProfileScreen
+import com.example.collabmefrontend.presentation.profile.ProfileViewModel
 import com.example.collabmefrontend.presentation.register.RegisterScreen
 import com.example.collabmefrontend.presentation.register.RegisterViewModel
 import kotlin.math.log
@@ -16,7 +17,8 @@ import kotlin.math.log
 @Composable
 fun AppNavigation(
     loginViewModel: LoginViewModel,
-    registerViewModel: RegisterViewModel
+    registerViewModel: RegisterViewModel,
+    profileViewModel: ProfileViewModel
 ){
     // Создаем nav Controller
     val navController = rememberNavController()
@@ -29,7 +31,6 @@ fun AppNavigation(
         composable(Routes.LOGIN) {
             LoginScreen(
                 viewModel = loginViewModel,
-
 
                 // переход на профиль
                 onNavigateToProfile = {
@@ -44,7 +45,6 @@ fun AppNavigation(
             )
         }
         composable(Routes.REGISTER) {
-            // Логика с регистрацией. Необходимо добавить RegisterScreen
             RegisterScreen(
                 viewModel = registerViewModel,
                 onNavigateToLogin = {
@@ -59,9 +59,13 @@ fun AppNavigation(
         }
 
         composable(Routes.PROFILE) {
-            // логика с выходом из профиля
             ProfileScreen(
-                text = "Экран профиля"
+                viewModel = profileViewModel,
+                onNavigateToLogin = {
+                    navController.navigate(Routes.LOGIN){
+                        popUpTo(Routes.PROFILE) {  inclusive = true}
+                    }
+                }
             )
         }
     }
