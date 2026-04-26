@@ -16,11 +16,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.collabmefrontend.core.network.ApiClient
 import com.example.collabmefrontend.core.viewmodel.ViewModelFactory
+import com.example.collabmefrontend.data.remote.api.ApplicationApi
 import com.example.collabmefrontend.data.remote.api.AuthApi
 import com.example.collabmefrontend.data.remote.api.ProfileApi
+import com.example.collabmefrontend.data.repository.RemoteApplicationRepository
 import com.example.collabmefrontend.data.repository.RemoteAuthRepository
 import com.example.collabmefrontend.data.repository.RemoteProfileRepository
 import com.example.collabmefrontend.data.storage.TokenStorage
+import com.example.collabmefrontend.presentation.applications.list.ApplicationsViewModel
 import com.example.collabmefrontend.presentation.login.LoginViewModel
 import com.example.collabmefrontend.presentation.navigation.AppNavigation
 import com.example.collabmefrontend.presentation.profile.ProfileViewModel
@@ -39,6 +42,12 @@ class MainActivity : ComponentActivity() {
 
             val authApi = remember { AuthApi(httpClient) }
             val profileApi = remember{ProfileApi(httpClient)}
+            val applicationsApi = remember{
+                ApplicationApi(
+                    client = httpClient,
+                    baseUrl = ApiClient.BASE_URL
+                )
+            }
             val authRepository = remember {
                 RemoteAuthRepository(authApi, tokenStorage)
             }
@@ -47,6 +56,9 @@ class MainActivity : ComponentActivity() {
                 RemoteProfileRepository(profileApi, tokenStorage)
             }
 
+            val applicationsRepository = remember {
+                RemoteApplicationRepository(applicationsApi)
+            }
 
             val loginViewModel: LoginViewModel = viewModel(
                 factory = ViewModelFactory {
@@ -69,12 +81,19 @@ class MainActivity : ComponentActivity() {
                 }
             )
 
+            val applicationsViewModel: ApplicationsViewModel = viewModel(
+                factory = ViewModelFactory {
+                    ApplicationsViewModel(applicationsRepository)
+                }
+            )
+
 
 
             AppNavigation(
                 loginViewModel = loginViewModel,
                 registerViewModel = registerViewModel,
-                profileViewModel = profileViewModel
+                profileViewModel = profileViewModel,
+                applicationsViewModel = applicationsViewModel
             )
         }
     }
