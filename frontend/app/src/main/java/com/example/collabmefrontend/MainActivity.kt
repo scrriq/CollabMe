@@ -12,7 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.collabmefrontend.core.network.ApiClient
+import com.example.collabmefrontend.core.viewmodel.ViewModelFactory
 import com.example.collabmefrontend.data.remote.api.AuthApi
 import com.example.collabmefrontend.data.remote.api.ProfileApi
 import com.example.collabmefrontend.data.repository.RemoteAuthRepository
@@ -30,27 +33,44 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val context = this@MainActivity
 
             val httpClient = remember { ApiClient.create() }
-            val tokenStorage = remember { TokenStorage(context.applicationContext) }
+            val tokenStorage = remember { TokenStorage(applicationContext) }
 
+            val authApi = remember { AuthApi(httpClient) }
+            val profileApi = remember{ProfileApi(httpClient)}
             val authRepository = remember {
-                RemoteAuthRepository(
-                    api = AuthApi(httpClient),
-                    tokenStorage = tokenStorage
-                )
+                RemoteAuthRepository(authApi, tokenStorage)
             }
 
             val profileRepository = remember {
-                RemoteProfileRepository(
-                    api = ProfileApi(httpClient),
-                    tokenStorage = tokenStorage
-                )
+                RemoteProfileRepository(profileApi, tokenStorage)
             }
-            val loginViewModel = remember { LoginViewModel(authRepository) }
-            val registerViewModel = remember { RegisterViewModel(authRepository) }
-            val profileViewModel = remember { ProfileViewModel(profileRepository, authRepository) }
+
+
+            val loginViewModel: LoginViewModel = viewModel(
+                factory = ViewModelFactory {
+                    LoginViewModel(authRepository)
+                }
+            )
+
+            val registerViewModel: RegisterViewModel = viewModel(
+                factory = ViewModelFactory {
+                    RegisterViewModel(authRepository)
+                }
+            )
+
+            val profileViewModel: ProfileViewModel = viewModel(
+                factory = ViewModelFactory {
+                    ProfileViewModel(
+                        profileRepository = profileRepository,
+                        authRepository = authRepository
+                    )
+                }
+            )
+
+
+
             AppNavigation(
                 loginViewModel = loginViewModel,
                 registerViewModel = registerViewModel,
