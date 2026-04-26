@@ -6,6 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.collabme.presentation.auth.login.LoginScreen
+import com.example.collabmefrontend.presentation.applications.list.ApplicationsScreen
+import com.example.collabmefrontend.presentation.applications.list.ApplicationsViewModel
 import com.example.collabmefrontend.presentation.login.LoginViewModel
 import com.example.collabmefrontend.presentation.profile.ProfileScreen
 import com.example.collabmefrontend.presentation.profile.ProfileViewModel
@@ -18,7 +20,8 @@ import kotlin.math.log
 fun AppNavigation(
     loginViewModel: LoginViewModel,
     registerViewModel: RegisterViewModel,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    applicationsViewModel: ApplicationsViewModel
 ){
     // Создаем nav Controller
     val navController = rememberNavController()
@@ -26,7 +29,7 @@ fun AppNavigation(
     //Описываем навигацию
     NavHost(
         navController = navController,
-        startDestination = Routes.LOGIN
+        startDestination = Routes.APPLICATIONS
     ){
         composable(Routes.LOGIN) {
             LoginScreen(
@@ -66,6 +69,12 @@ fun AppNavigation(
                         popUpTo(Routes.PROFILE) {  inclusive = true}
                     }
                 }
+            )
+        }
+
+        composable(Routes.APPLICATIONS){
+            ApplicationsScreen(
+                viewModel = applicationsViewModel
             )
         }
     }
