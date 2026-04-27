@@ -5,4 +5,9 @@ object Routes {
     const val REGISTER = "register"
     const val PROFILE = "profile"
     const val APPLICATIONS = "applications"
+    const val APPLICATIONS_DETAILS = "applications/{applicationId}"
+
+    fun applicationDetail(applicationId: String) : String {
+        return "applications/$applicationId"
+    }
 }

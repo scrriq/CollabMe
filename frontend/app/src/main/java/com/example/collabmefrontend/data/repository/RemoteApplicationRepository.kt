@@ -11,4 +11,7 @@ class RemoteApplicationRepository(
         return api.getApplications().map { it.toDomain() }
     }
 
+    override suspend fun getApplicationById(applicationId: String): ApplicationItem {
+        return api.getApplicationsById(applicationId).toDomain()
+    }
 }

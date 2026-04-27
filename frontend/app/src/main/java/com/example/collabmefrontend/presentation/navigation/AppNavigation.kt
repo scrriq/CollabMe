@@ -2,10 +2,14 @@ package com.example.collabmefrontend.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.collabme.presentation.auth.login.LoginScreen
+import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailScreen
+import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
 import com.example.collabmefrontend.presentation.applications.list.ApplicationsScreen
 import com.example.collabmefrontend.presentation.applications.list.ApplicationsViewModel
 import com.example.collabmefrontend.presentation.login.LoginViewModel
@@ -21,12 +25,11 @@ fun AppNavigation(
     loginViewModel: LoginViewModel,
     registerViewModel: RegisterViewModel,
     profileViewModel: ProfileViewModel,
-    applicationsViewModel: ApplicationsViewModel
+    applicationsViewModel: ApplicationsViewModel,
+    applicationDetailViewModel: ApplicationDetailViewModel
 ){
-    // Создаем nav Controller
     val navController = rememberNavController()
 
-    //Описываем навигацию
     NavHost(
         navController = navController,
         startDestination = Routes.APPLICATIONS
@@ -74,7 +77,30 @@ fun AppNavigation(
 
         composable(Routes.APPLICATIONS){
             ApplicationsScreen(
-                viewModel = applicationsViewModel
+                viewModel = applicationsViewModel,
+                onNavigateToDetails = { applicationId ->
+                    navController.navigate(Routes.applicationDetail(applicationId))
+                }
+            )
+        }
+
+        composable(
+            route = Routes.APPLICATIONS_DETAILS,
+            arguments = listOf(
+                navArgument("applicationId"){
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val applicationId = backStackEntry.arguments?.getString("applicationId")
+                ?: return@composable
+
+            ApplicationDetailScreen(
+                applicationId = applicationId,
+                viewModel = applicationDetailViewModel,
+                onBack = {
+                    navController.popBackStack()
+                }
             )
         }
     }

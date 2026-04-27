@@ -23,6 +23,7 @@ import com.example.collabmefrontend.data.repository.RemoteApplicationRepository
 import com.example.collabmefrontend.data.repository.RemoteAuthRepository
 import com.example.collabmefrontend.data.repository.RemoteProfileRepository
 import com.example.collabmefrontend.data.storage.TokenStorage
+import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
 import com.example.collabmefrontend.presentation.applications.list.ApplicationsViewModel
 import com.example.collabmefrontend.presentation.login.LoginViewModel
 import com.example.collabmefrontend.presentation.navigation.AppNavigation
@@ -87,13 +88,20 @@ class MainActivity : ComponentActivity() {
                 }
             )
 
+            val applicationDetailViewModel: ApplicationDetailViewModel = viewModel(
+                factory = ViewModelFactory{
+                    ApplicationDetailViewModel(applicationsRepository)
+                }
+            )
+
 
 
             AppNavigation(
                 loginViewModel = loginViewModel,
                 registerViewModel = registerViewModel,
                 profileViewModel = profileViewModel,
-                applicationsViewModel = applicationsViewModel
+                applicationsViewModel = applicationsViewModel,
+                applicationDetailViewModel = applicationDetailViewModel
             )
         }
     }

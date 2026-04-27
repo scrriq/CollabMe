@@ -12,4 +12,8 @@ class ApplicationApi(
     suspend fun getApplications() : List<ApplicationDto>{
         return client.get("$baseUrl/applications").body()
     }
+
+    suspend fun getApplicationsById(applicationId: String) : ApplicationDto{
+        return client.get("$baseUrl/applications/$applicationId").body()
+    }
 }

@@ -12,7 +12,11 @@ data class ApplicationsState(
 sealed interface ApplicationsIntent{
     data object Load: ApplicationsIntent
     data object Retry: ApplicationsIntent
+    data class ApplicationClicked(val applicationId: String) : ApplicationsIntent
+}
+
+sealed interface ApplicationEffect{
+    data class NavigateToDetails(val applicationId: String) : ApplicationEffect
 }
 
 
-// реализовать в дальнейшем effect для переход на карточку applications

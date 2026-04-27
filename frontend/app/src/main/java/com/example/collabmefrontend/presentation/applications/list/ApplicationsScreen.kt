@@ -26,16 +26,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.collabmefrontend.presentation.profile.ProfileIntent
+import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
 fun ApplicationsScreen(
     viewModel: ApplicationsViewModel,
+    onNavigateToDetails: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.onIntent(ApplicationsIntent.Load)
+
+        viewModel.effect.collectLatest { effect ->
+            when(effect){
+                is ApplicationEffect.NavigateToDetails -> {
+                    onNavigateToDetails(effect.applicationId)
+                }
+            }
+        }
     }
 
     Column(
@@ -95,7 +105,7 @@ fun ApplicationsScreen(
                         createdAt = application.createdAt,
                         statusId = application.statusId,
                         onClick = {
-                            // TODO navigation
+                            viewModel.onIntent(ApplicationsIntent.ApplicationClicked(application.id))
                         }
                     )
                 }
