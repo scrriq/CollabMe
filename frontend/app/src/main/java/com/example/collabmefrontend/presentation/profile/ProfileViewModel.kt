@@ -3,20 +3,27 @@ package com.example.collabmefrontend.presentation.profile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.collabmefrontend.data.mapper.toJsonObjectOrNull
+import com.example.collabmefrontend.data.mapper.toSocialLinksUiModel
 import com.example.collabmefrontend.data.remote.api.ApiException
+import com.example.collabmefrontend.data.repository.ProfileCatalogRepository
 import com.example.collabmefrontend.data.repository.ProfileRepository
 import com.example.collabmefrontend.data.repository.RemoteAuthRepository
+import com.example.collabmefrontend.domain.model.SocialLinkUiModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 class ProfileViewModel(
     private val profileRepository: ProfileRepository,
+    private val profileCatalogRepository: ProfileCatalogRepository,
     private val authRepository: RemoteAuthRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileState())
@@ -31,12 +38,17 @@ class ProfileViewModel(
             is ProfileIntent.LastNameChanged -> _state.value = _state.value.copy(lastName = intent.value, error = null)
             is ProfileIntent.MiddleNameChanged -> _state.value = _state.value.copy(middleName = intent.value, error = null)
             is ProfileIntent.BirthDateChanged -> _state.value = _state.value.copy(birthDate = intent.value, error = null)
-            is ProfileIntent.GenderChanged -> _state.value = _state.value.copy(gender = intent.value, error = null)
-            is ProfileIntent.CityIdChanged -> _state.value = _state.value.copy(cityId = intent.value, error = null)
-            is ProfileIntent.UniversityIdChanged -> _state.value = _state.value.copy(universityId = intent.value, error = null)
+            is ProfileIntent.GenderChanged -> _state.value = _state.value.copy(gender = intent.value ?: "", error = null)
+            is ProfileIntent.CityIdChanged -> _state.value = _state.value.copy(cityId = intent.value ?: "", error = null)
+            is ProfileIntent.UniversityIdChanged -> _state.value = _state.value.copy(universityId = intent.value?: "", error = null)
             is ProfileIntent.AboutChanged -> _state.value = _state.value.copy(about = intent.value, error = null)
             is ProfileIntent.AvatarUrlChanged -> _state.value = _state.value.copy(avatarUrl = intent.value, error = null)
-            is ProfileIntent.SocialLinksChanged -> _state.value = _state.value.copy(socialLinks = intent.value, error = null)
+
+            ProfileIntent.AddSocialLink -> addSocialLink()
+            is ProfileIntent.RemoveSocialLink -> removeSocialLink(intent.index)
+            is ProfileIntent.SocialPlatformChanged -> updateSocialPlatform(intent.index, intent.value)
+            is ProfileIntent.SocialUrlChanged -> updateSocialUrl(intent.index, intent.value)
+
             ProfileIntent.Save -> save()
             ProfileIntent.Logout -> logout()
         }
@@ -47,6 +59,8 @@ class ProfileViewModel(
             _state.value = _state.value.copy(isLoading = true, error = null)
 
             try{
+                val cityOptions = runCatching { profileCatalogRepository.getCities() }.getOrDefault(emptyList())
+                val universityOptions = runCatching { profileCatalogRepository.getUniversities() }.getOrDefault(emptyList())
                 val user = profileRepository.getMyProfileOrNull()
                 if (user == null) {
                     _state.value = _state.value.copy(
@@ -62,7 +76,9 @@ class ProfileViewModel(
                         universityId = "",
                         about = "",
                         avatarUrl = "",
-                        socialLinks = "{}",
+                        socialLinks = listOf(SocialLinkUiModel()),
+                        cityOptions = cityOptions,
+                        universityOptions = universityOptions,
                         error = null
                     )
                     return@launch
@@ -79,7 +95,9 @@ class ProfileViewModel(
                     universityId = user.universityId ?: "",
                     about = user.about ?: "",
                     avatarUrl = user.avatarUrl ?: "",
-                    socialLinks = user.socialLinks.toString(),
+                    socialLinks = user.socialLinks.toSocialLinksUiModel(),
+                    cityOptions = cityOptions,
+                    universityOptions = universityOptions,
                     isFirstRegistration = false,
                     error = null
                 )
@@ -99,9 +117,11 @@ class ProfileViewModel(
                 _state.value = current.copy(error = "First name and last name are required")
                 return@launch
             }
-            val socialLinks = parseSocialLinksOrNull(current.socialLinks)
-            if (socialLinks == null) {
-                _state.value = current.copy(error = "socialLinks must be a valid JSON object, e.g. {}")
+
+            val socialLinks: JsonObject = try {
+                current.socialLinks.toJsonObjectOrNull() ?: buildJsonObject { }
+            } catch (e: IllegalArgumentException) {
+                _state.value = current.copy(error = e.message)
                 return@launch
             }
 
@@ -140,7 +160,8 @@ class ProfileViewModel(
                     user = saved,
                     isFirstRegistration = false,
                     isSaving = false,
-                    error = null
+                    error = null,
+                    socialLinks = saved.socialLinks.toSocialLinksUiModel()
                 )
             } catch (e: ApiException) {
                 Log.e("ProfileSave", "ApiException while saving profile", e)
@@ -165,9 +186,36 @@ class ProfileViewModel(
         }
     }
 
-    private fun parseSocialLinksOrNull(raw: String): JsonObject? {
-        val source = raw.ifBlank { "{}" }
-        return runCatching { Json.parseToJsonElement(source) as? JsonObject }.getOrNull()
+
+    private fun addSocialLink() {
+        _state.value = _state.value.copy(
+            socialLinks = _state.value.socialLinks + SocialLinkUiModel()
+        )
     }
 
+    private fun removeSocialLink(index: Int) {
+        val currentList = _state.value.socialLinks.toMutableList()
+        if (currentList.size <= 1) {
+            currentList[0] = SocialLinkUiModel()
+        } else if (index in currentList.indices) {
+            currentList.removeAt(index)
+        }
+        _state.value = _state.value.copy(socialLinks = currentList)
+    }
+
+    private fun updateSocialPlatform(index: Int, value: String) {
+        val currentList = _state.value.socialLinks.toMutableList()
+        if (index in currentList.indices) {
+            currentList[index] = currentList[index].copy(platform = value)
+            _state.value = _state.value.copy(socialLinks = currentList, error = null)
+        }
+    }
+
+    private fun updateSocialUrl(index: Int, value: String) {
+        val currentList = _state.value.socialLinks.toMutableList()
+        if (index in currentList.indices) {
+            currentList[index] = currentList[index].copy(url = value)
+            _state.value = _state.value.copy(socialLinks = currentList, error = null)
+        }
+    }
 }

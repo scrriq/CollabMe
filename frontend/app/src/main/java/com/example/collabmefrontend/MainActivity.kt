@@ -18,9 +18,11 @@ import com.example.collabmefrontend.core.network.ApiClient
 import com.example.collabmefrontend.core.viewmodel.ViewModelFactory
 import com.example.collabmefrontend.data.remote.api.ApplicationApi
 import com.example.collabmefrontend.data.remote.api.AuthApi
+import com.example.collabmefrontend.data.remote.api.CatalogApi
 import com.example.collabmefrontend.data.remote.api.ProfileApi
 import com.example.collabmefrontend.data.repository.RemoteApplicationRepository
 import com.example.collabmefrontend.data.repository.RemoteAuthRepository
+import com.example.collabmefrontend.data.repository.RemoteProfileCatalogRepository
 import com.example.collabmefrontend.data.repository.RemoteProfileRepository
 import com.example.collabmefrontend.data.storage.TokenStorage
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
@@ -43,6 +45,7 @@ class MainActivity : ComponentActivity() {
 
             val authApi = remember { AuthApi(httpClient) }
             val profileApi = remember{ProfileApi(httpClient)}
+            val catalogApi = remember { CatalogApi(httpClient) }
             val applicationsApi = remember{
                 ApplicationApi(
                     client = httpClient,
@@ -55,6 +58,9 @@ class MainActivity : ComponentActivity() {
 
             val profileRepository = remember {
                 RemoteProfileRepository(profileApi, tokenStorage)
+            }
+            val profileCatalogRepository = remember {
+                RemoteProfileCatalogRepository(catalogApi)
             }
 
             val applicationsRepository = remember {
@@ -77,6 +83,7 @@ class MainActivity : ComponentActivity() {
                 factory = ViewModelFactory {
                     ProfileViewModel(
                         profileRepository = profileRepository,
+                        profileCatalogRepository = profileCatalogRepository,
                         authRepository = authRepository
                     )
                 }
