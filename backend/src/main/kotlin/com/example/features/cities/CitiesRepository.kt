@@ -6,6 +6,17 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 
 class CitiesRepository {
+    fun findAll(): List<CityDto> = transaction {
+        CitiesTable
+            .selectAll()
+            .map { row ->
+                CityDto(
+                    id = row[CitiesTable.id].toString(),
+                    name = row[CitiesTable.name],
+                )
+            }
+    }
+
     fun findById(id: UUID): CityDto? = transaction {
         CitiesTable
             .selectAll()

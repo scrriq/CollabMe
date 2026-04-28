@@ -6,6 +6,20 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 
 class UniversitiesRepository {
+    fun findAll(): List<UniversityDto> = transaction {
+        UniversitiesTable
+            .selectAll()
+            .map { row ->
+                UniversityDto(
+                    id = row[UniversitiesTable.id].toString(),
+                    name = row[UniversitiesTable.name],
+                    slug = row[UniversitiesTable.slug],
+                    cityId = row[UniversitiesTable.cityId]?.toString(),
+                )
+            }
+            .sortedBy { it.name.lowercase() }
+    }
+
     fun findById(id: UUID): UniversityDto? = transaction {
         UniversitiesTable
             .selectAll()

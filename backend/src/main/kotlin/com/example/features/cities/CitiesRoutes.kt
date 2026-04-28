@@ -11,6 +11,10 @@ import java.util.UUID
 
 fun Route.CitiesRoutes(citiesService: CitiesService) {
     route("/cities") {
+        get {
+            call.respond(citiesService.getAll())
+        }
+
         get("/{id}") {
             val idParam = call.parameters["id"]
                 ?: throw ValidationException("Missing id parameter")
