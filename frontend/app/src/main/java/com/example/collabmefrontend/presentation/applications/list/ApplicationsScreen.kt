@@ -1,6 +1,5 @@
 package com.example.collabmefrontend.presentation.applications.list
 
-import android.widget.Space
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,26 +23,25 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.collabmefrontend.presentation.profile.ProfileIntent
 import kotlinx.coroutines.flow.collectLatest
-
 
 @Composable
 fun ApplicationsScreen(
     viewModel: ApplicationsViewModel,
-    onNavigateToDetails: (String) -> Unit
+    onNavigateToDetails: (String) -> Unit,
+    onNavigateToCreate: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.onIntent(ApplicationsIntent.Load)
+    }
 
+    LaunchedEffect(viewModel) {
         viewModel.effect.collectLatest { effect ->
-            when(effect){
-                is ApplicationEffect.NavigateToDetails -> {
-                    onNavigateToDetails(effect.applicationId)
-                }
+            when (effect) {
+                is ApplicationEffect.NavigateToDetails -> onNavigateToDetails(effect.applicationId)
+                ApplicationEffect.NavigateToCreate -> onNavigateToCreate()
             }
         }
     }
@@ -53,11 +51,19 @@ fun ApplicationsScreen(
             .fillMaxSize()
             .padding(16.dp, 50.dp)
     ) {
-
         Text(
             text = "Applications",
             style = MaterialTheme.typography.headlineMedium
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { viewModel.onIntent(ApplicationsIntent.AddClicked) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Новая заявка")
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -67,7 +73,6 @@ fun ApplicationsScreen(
 
         state.error?.let {
             Spacer(modifier = Modifier.height(12.dp))
-
             Text(
                 text = it,
                 color = MaterialTheme.colorScheme.error
@@ -75,9 +80,7 @@ fun ApplicationsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
-                onClick = { viewModel.onIntent(ApplicationsIntent.Retry) }
-            ) {
+            Button(onClick = { viewModel.onIntent(ApplicationsIntent.Retry) }) {
                 Text("Retry")
             }
         }
@@ -105,7 +108,9 @@ fun ApplicationsScreen(
                         createdAt = application.createdAt,
                         statusId = application.statusId,
                         onClick = {
-                            viewModel.onIntent(ApplicationsIntent.ApplicationClicked(application.id))
+                            viewModel.onIntent(
+                                ApplicationsIntent.ApplicationClicked(application.id)
+                            )
                         }
                     )
                 }
@@ -113,6 +118,7 @@ fun ApplicationsScreen(
         }
     }
 }
+
 @Composable
 private fun ApplicationCard(
     title: String,
@@ -120,14 +126,14 @@ private fun ApplicationCard(
     createdAt: String,
     statusId: String,
     onClick: () -> Unit
-){
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable{onClick()},
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ){
-        Column(modifier = Modifier.padding(16.dp)){
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(text = title, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = description, style = MaterialTheme.typography.bodyMedium)

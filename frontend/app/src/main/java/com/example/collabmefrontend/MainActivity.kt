@@ -26,6 +26,7 @@ import com.example.collabmefrontend.data.repository.RemoteProfileCatalogReposito
 import com.example.collabmefrontend.data.repository.RemoteProfileRepository
 import com.example.collabmefrontend.data.storage.TokenStorage
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
+import com.example.collabmefrontend.presentation.applications.form.ApplicationFormViewModel
 import com.example.collabmefrontend.presentation.applications.list.ApplicationsViewModel
 import com.example.collabmefrontend.presentation.login.LoginViewModel
 import com.example.collabmefrontend.presentation.navigation.AppNavigation
@@ -50,7 +51,8 @@ class MainActivity : ComponentActivity() {
             val applicationsApi = remember{
                 ApplicationApi(
                     client = httpClient,
-                    baseUrl = ApiClient.BASE_URL
+                    baseUrl = ApiClient.BASE_URL,
+                    tokenStorage = tokenStorage
                 )
             }
             val authRepository = remember {
@@ -110,7 +112,13 @@ class MainActivity : ComponentActivity() {
                     ApplicationDetailViewModel(applicationsRepository)
                 }
             )
-
+            val applicationFormViewModel: ApplicationFormViewModel = viewModel(
+                factory = ViewModelFactory {
+                    ApplicationFormViewModel(
+                        applicationRepository = applicationsRepository
+                    )
+                }
+            )
 
 
             AppNavigation(
@@ -119,7 +127,8 @@ class MainActivity : ComponentActivity() {
                 profileViewModel = profileViewModel,
                 applicationsViewModel = applicationsViewModel,
                 applicationDetailViewModel = applicationDetailViewModel,
-                publicProfileViewModel = publicProfileViewModel
+                publicProfileViewModel = publicProfileViewModel,
+                applicationFormViewModel = applicationFormViewModel
             )
         }
     }

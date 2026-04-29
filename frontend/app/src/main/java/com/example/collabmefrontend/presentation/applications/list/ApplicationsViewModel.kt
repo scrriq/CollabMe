@@ -12,16 +12,16 @@ import kotlinx.coroutines.launch
 
 class ApplicationsViewModel(
     private val applicationRepository: ApplicationRepository
-): ViewModel(){
+) : ViewModel() {
+
     private val _state = MutableStateFlow(ApplicationsState())
     val state: StateFlow<ApplicationsState> = _state.asStateFlow()
 
     private val _effect = Channel<ApplicationEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
-
-    fun onIntent(intent: ApplicationsIntent){
-        when(intent){
+    fun onIntent(intent: ApplicationsIntent) {
+        when (intent) {
             ApplicationsIntent.Load,
             ApplicationsIntent.Retry -> loadApplications()
 
@@ -30,21 +30,27 @@ class ApplicationsViewModel(
                     _effect.send(ApplicationEffect.NavigateToDetails(intent.applicationId))
                 }
             }
+
+            ApplicationsIntent.AddClicked -> {
+                viewModelScope.launch {
+                    _effect.send(ApplicationEffect.NavigateToCreate)
+                }
+            }
         }
     }
 
-    private fun loadApplications(){
+    private fun loadApplications() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
 
-            try{
+            try {
                 val items = applicationRepository.getApplications()
                 _state.value = _state.value.copy(
                     applications = items,
                     isLoading = false,
                     error = null
                 )
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
                     error = e.message ?: "Failed to load applications"
