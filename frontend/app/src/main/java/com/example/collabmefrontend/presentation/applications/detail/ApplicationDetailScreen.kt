@@ -1,6 +1,13 @@
 package com.example.collabmefrontend.presentation.applications.detail
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,26 +15,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApplicationDetailScreen(
     applicationId: String,
     viewModel: ApplicationDetailViewModel,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
-    onNavigateToProfile: (String) -> Unit // Новый колбэк
+    onNavigateToProfile: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
-    // Подписка на эффекты навигации из ViewModel
     LaunchedEffect(viewModel) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
-                is ApplicationDetailEffect.NavigateToUserProfile -> {
-                    onNavigateToProfile(effect.userId)
-                }
+                is ApplicationDetailEffect.NavigateToUserProfile -> onNavigateToProfile(effect.userId)
             }
         }
     }
@@ -36,103 +43,117 @@ fun ApplicationDetailScreen(
         viewModel.onIntent(ApplicationDetailIntent.Load(applicationId))
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top
-    ) {
-        Text(
-            text = "Application details",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (state.isLoading) {
-            CircularProgressIndicator()
-        }
-
-        state.error?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error)
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = { viewModel.onIntent(ApplicationDetailIntent.Retry) }) {
-                Text("Retry")
-            }
-        }
-
-        state.application?.let { application ->
-            DetailRow("ID", application.id)
-
-            // Специальная строка для User ID с кнопкой перехода
-            UserDetailRow(
-                userId = application.userId,
-                onUserClick = {
-                    viewModel.onIntent(ApplicationDetailIntent.UserClicked(application.userId))
-                }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Детали заявки") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                },
+                actions = {
+                    state.application?.let {
+                        IconButton(onClick = { onEdit(it.id) }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Редактировать")
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF1976D2),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                )
             )
+        }
+    ) { padding ->
+        if (state.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color(0xFF1976D2))
+            }
+        }
 
-            DetailRow("Theme ID", application.themeId)
-            DetailRow("Kind ID", application.kindId)
-            DetailRow("Status ID", application.statusId)
-            DetailRow("Title", application.title)
-            DetailRow("Description", application.description)
-            DetailRow("Created at", application.createdAt)
-            DetailRow("Updated at", application.updatedAt)
-            DetailRow("Completed at", application.completedAt ?: "-")
-            DetailRow("Deleted at", application.deletedAt ?: "-")
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = { onEdit(application.id) },
-                modifier = Modifier.fillMaxWidth()
+        state.application?.let { app ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Edit")
+                // Главная карточка с заголовком
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = app.title,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0D47A1)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = app.description,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+
+                // Инфо о пользователе
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF1976D2))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Автор (ID)", style = MaterialTheme.typography.labelMedium)
+                            Text(app.userId, style = MaterialTheme.typography.bodyMedium)
+                        }
+                        TextButton(onClick = { viewModel.onIntent(ApplicationDetailIntent.UserClicked(app.userId)) }) {
+                            Text("Профиль", color = Color(0xFF1976D2))
+                        }
+                    }
+                }
+
+                // Технические детали
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        DetailItem("Статус", app.statusId)
+                        DetailItem("Тип (Kind)", app.kindId)
+                        DetailItem("Тема", app.themeId)
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFBBDEFB))
+                        DetailItem("Создано", app.createdAt)
+                        DetailItem("Обновлено", app.updatedAt)
+                    }
+                }
             }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Button(
-            onClick = onBack,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.filledTonalButtonColors()
-        ) {
-            Text("Back")
         }
     }
 }
 
 @Composable
-private fun UserDetailRow(
-    userId: String,
-    onUserClick: () -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "User ID", style = MaterialTheme.typography.labelMedium)
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = userId, style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = onUserClick) {
-                Text("Смотреть профиль")
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Divider()
+private fun DetailItem(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+        Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
     }
-}
-
-@Composable
-private fun DetailRow(label: String, value: String) {
-    Spacer(modifier = Modifier.height(8.dp))
-    Text(text = label, style = MaterialTheme.typography.labelMedium)
-    Text(text = value, style = MaterialTheme.typography.bodyMedium)
-    Spacer(modifier = Modifier.height(8.dp))
-    Divider()
 }

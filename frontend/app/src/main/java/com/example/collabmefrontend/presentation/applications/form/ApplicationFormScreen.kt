@@ -1,33 +1,18 @@
 package com.example.collabmefrontend.presentation.applications.form
 
-import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Title
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
@@ -62,93 +47,112 @@ fun ApplicationFormScreen(
                 title = {
                     Text(
                         text = if (state.id == null) "Новая заявка" else "Изменить заявку",
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(),
+                navigationIcon = {
+                    IconButton(onClick = onClose) {
+                        Icon(Icons.Default.Close, contentDescription = "Закрыть")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color(0xFF0D47A1)
+                ),
             )
         },
     ) { padding ->
-        if (state.isLoading) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-            ) {
-                Spacer(modifier = Modifier.height(40.dp))
-                CircularProgressIndicator()
-            }
-            return@Scaffold
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            state.error?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                )
+            if (state.isLoading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Color(0xFF1976D2))
             }
 
-            OutlinedTextField(
-                value = state.themeId,
-                onValueChange = { viewModel.onIntent(ApplicationFormIntent.ThemeChanged(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Theme ID") },
-                singleLine = true,
+            state.error?.let {
+                Text(text = it, color = MaterialTheme.colorScheme.error)
+            }
+
+            val textFieldColors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFF1976D2),
+                focusedLabelColor = Color(0xFF1976D2)
             )
 
-            OutlinedTextField(
-                value = state.kindId,
-                onValueChange = { viewModel.onIntent(ApplicationFormIntent.KindChanged(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Kind ID") },
-                singleLine = true,
-            )
-
-            OutlinedTextField(
-                value = state.statusId,
-                onValueChange = { viewModel.onIntent(ApplicationFormIntent.StatusChanged(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Status ID") },
-                singleLine = true,
-            )
-
+            // Заголовок
             OutlinedTextField(
                 value = state.title,
                 onValueChange = { viewModel.onIntent(ApplicationFormIntent.TitleChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Заголовок") },
-                singleLine = true,
+                leadingIcon = { Icon(Icons.Default.Title, contentDescription = null) },
+                shape = RoundedCornerShape(12.dp),
+                colors = textFieldColors
             )
 
+            // Описание
             OutlinedTextField(
                 value = state.description,
                 onValueChange = { viewModel.onIntent(ApplicationFormIntent.DescriptionChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Описание") },
-                minLines = 4,
+                leadingIcon = { Icon(Icons.Default.Description, contentDescription = null) },
+                minLines = 3,
+                shape = RoundedCornerShape(12.dp),
+                colors = textFieldColors
             )
+
+            // Kind ID (вынесено отдельной строкой с иконкой)
+            OutlinedTextField(
+                value = state.kindId,
+                onValueChange = { viewModel.onIntent(ApplicationFormIntent.KindChanged(it)) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Kind ID") },
+                leadingIcon = { Icon(Icons.Default.Category, contentDescription = null) },
+                shape = RoundedCornerShape(12.dp),
+                colors = textFieldColors
+            )
+
+            // Остальные ID в одну строку для экономии места
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = state.themeId,
+                    onValueChange = { viewModel.onIntent(ApplicationFormIntent.ThemeChanged(it)) },
+                    modifier = Modifier.weight(1f),
+                    label = { Text("Theme ID") },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = textFieldColors
+                )
+                OutlinedTextField(
+                    value = state.statusId,
+                    onValueChange = { viewModel.onIntent(ApplicationFormIntent.StatusChanged(it)) },
+                    modifier = Modifier.weight(1f),
+                    label = { Text("Status ID") },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = textFieldColors
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = { viewModel.onIntent(ApplicationFormIntent.SaveClicked) },
-                enabled = !state.isSaving,
-                modifier = Modifier.fillMaxWidth(),
+                enabled = !state.isSaving && !state.isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2))
             ) {
-                Text(if (state.isSaving) "Сохранение..." else "Сохранить")
-            }
-
-            TextButton(
-                onClick = onClose,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Отмена")
+                if (state.isSaving) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("Сохранить", style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }
