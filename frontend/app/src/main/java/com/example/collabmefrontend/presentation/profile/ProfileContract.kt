@@ -48,4 +48,5 @@ sealed interface ProfileIntent{
 
 sealed interface ProfileEffect{
     data object NavigateToLogin : ProfileEffect
+    data class NavigateToPublicProfile(val userId: String) : ProfileEffect
 }

@@ -5,6 +5,7 @@ import com.example.collabmefrontend.core.network.ApiClient
 import com.example.collabmefrontend.data.remote.dto.UserProfilePatchRequestDto
 import com.example.collabmefrontend.data.remote.dto.UserProfilePutRequestDto
 import com.example.collabmefrontend.data.remote.dto.UserProfileDto
+import com.example.collabmefrontend.domain.model.UserProfile
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -36,6 +37,19 @@ class ProfileApi(
 
         if (!response.status.isSuccess()) {
             throwProfileException(response.status.value, response.bodyAsText())
+        }
+
+        return response.body()
+    }
+
+    suspend fun getProfileByUserId(userId: String) : UserProfileDto{
+
+        val response = client.get("$baseUrl/profile/$userId")
+        if(!response.status.isSuccess()){
+            if(response.status.value == 404){
+                throw ProfileNotFoundException("User profile not found")
+            }
+            throw ApiException("Failder to load profile: HTTP ${response.status.value}")
         }
 
         return response.body()

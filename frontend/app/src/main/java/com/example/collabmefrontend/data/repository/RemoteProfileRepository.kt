@@ -23,6 +23,14 @@ class RemoteProfileRepository(
         }
     }
 
+    override suspend fun getProfileByUserId(userId: String): UserProfile? {
+        return try{
+            api.getProfileByUserId(userId).toDomain()
+        } catch(_: ProfileNotFoundException){
+            null
+        }
+    }
+
     override suspend fun createMyProfile(
         firstName: String,
         lastName: String,

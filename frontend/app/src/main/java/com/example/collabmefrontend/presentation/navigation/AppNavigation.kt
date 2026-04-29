@@ -15,9 +15,10 @@ import com.example.collabmefrontend.presentation.applications.list.ApplicationsV
 import com.example.collabmefrontend.presentation.login.LoginViewModel
 import com.example.collabmefrontend.presentation.profile.ProfileScreen
 import com.example.collabmefrontend.presentation.profile.ProfileViewModel
+import com.example.collabmefrontend.presentation.profile.publicprofile.PublicProfileScreen
+import com.example.collabmefrontend.presentation.profile.publicprofile.PublicProfileViewModel
 import com.example.collabmefrontend.presentation.register.RegisterScreen
 import com.example.collabmefrontend.presentation.register.RegisterViewModel
-import kotlin.math.log
 
 
 @Composable
@@ -26,13 +27,14 @@ fun AppNavigation(
     registerViewModel: RegisterViewModel,
     profileViewModel: ProfileViewModel,
     applicationsViewModel: ApplicationsViewModel,
-    applicationDetailViewModel: ApplicationDetailViewModel
+    applicationDetailViewModel: ApplicationDetailViewModel,
+    publicProfileViewModel: PublicProfileViewModel
 ){
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = Routes.APPLICATIONS
+        startDestination = Routes.PROFILE
     ){
         composable(Routes.LOGIN) {
             LoginScreen(
@@ -71,7 +73,29 @@ fun AppNavigation(
                     navController.navigate(Routes.LOGIN){
                         popUpTo(Routes.PROFILE) {  inclusive = true}
                     }
+                },
+                onNavigateToPublicProfile = { userId ->
+                    navController.navigate("public_profile/$userId")
                 }
+            )
+        }
+
+        composable(
+            route = Routes.PUBLIC_PROFILE,
+            arguments = listOf(
+                navArgument("userId"){
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+
+            PublicProfileScreen(
+                viewModel = publicProfileViewModel,
+                userId = userId,
+                isOwnProfile = false,
+                onBack = {navController.popBackStack()},
+                onEdit = {navController.navigate(Routes.PROFILE)}
             )
         }
 

@@ -127,6 +127,9 @@ class ProfileViewModel(
 
             _state.value = current.copy(isSaving = true, error = null)
 
+
+
+
             try {
                 val saved = if (current.isFirstRegistration) {
                     profileRepository.createMyProfile(
@@ -163,6 +166,8 @@ class ProfileViewModel(
                     error = null,
                     socialLinks = saved.socialLinks.toSocialLinksUiModel()
                 )
+
+                _effect.send(ProfileEffect.NavigateToPublicProfile(saved.userId))
             } catch (e: ApiException) {
                 Log.e("ProfileSave", "ApiException while saving profile", e)
                 _state.value = _state.value.copy(

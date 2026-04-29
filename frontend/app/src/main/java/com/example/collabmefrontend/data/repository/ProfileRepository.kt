@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonObject
 
 interface ProfileRepository {
     suspend fun getMyProfileOrNull(): UserProfile?
+    suspend fun getProfileByUserId(userId: String) : UserProfile?
 
     suspend fun createMyProfile(
         firstName: String,

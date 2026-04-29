@@ -49,7 +49,8 @@ import androidx.compose.foundation.layout.ColumnScope
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onNavigateToPublicProfile: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -58,6 +59,9 @@ fun ProfileScreen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 ProfileEffect.NavigateToLogin -> onNavigateToLogin()
+                is ProfileEffect.NavigateToPublicProfile -> {
+                    onNavigateToPublicProfile(effect.userId)
+                }
             }
         }
     }
@@ -241,7 +245,9 @@ fun ProfileScreen(
 
             item {
                 Button(
-                    onClick = { viewModel.onIntent(ProfileIntent.Save) },
+                    onClick = {
+                        viewModel.onIntent(ProfileIntent.Save)
+                              },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !state.isSaving
                 ) {

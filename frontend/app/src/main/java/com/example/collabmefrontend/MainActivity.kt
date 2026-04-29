@@ -30,6 +30,7 @@ import com.example.collabmefrontend.presentation.applications.list.ApplicationsV
 import com.example.collabmefrontend.presentation.login.LoginViewModel
 import com.example.collabmefrontend.presentation.navigation.AppNavigation
 import com.example.collabmefrontend.presentation.profile.ProfileViewModel
+import com.example.collabmefrontend.presentation.profile.publicprofile.PublicProfileViewModel
 import com.example.collabmefrontend.presentation.register.RegisterViewModel
 import com.example.collabmefrontend.ui.theme.CollabMeFrontendTheme
 
@@ -89,6 +90,15 @@ class MainActivity : ComponentActivity() {
                 }
             )
 
+            val publicProfileViewModel: PublicProfileViewModel = viewModel(
+                factory = ViewModelFactory {
+                    PublicProfileViewModel(
+                        profileRepository = profileRepository,
+                        profileCatalogRepository = profileCatalogRepository
+                    )
+                }
+            )
+
             val applicationsViewModel: ApplicationsViewModel = viewModel(
                 factory = ViewModelFactory {
                     ApplicationsViewModel(applicationsRepository)
@@ -108,7 +118,8 @@ class MainActivity : ComponentActivity() {
                 registerViewModel = registerViewModel,
                 profileViewModel = profileViewModel,
                 applicationsViewModel = applicationsViewModel,
-                applicationDetailViewModel = applicationDetailViewModel
+                applicationDetailViewModel = applicationDetailViewModel,
+                publicProfileViewModel = publicProfileViewModel
             )
         }
     }
