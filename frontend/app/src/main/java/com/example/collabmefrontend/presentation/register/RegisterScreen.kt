@@ -1,21 +1,20 @@
 package com.example.collabmefrontend.presentation.register
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
@@ -37,79 +36,114 @@ fun RegisterScreen(
         }
     }
 
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = Color(0xFF1976D2),
+        focusedLabelColor = Color(0xFF1976D2),
+        cursorColor = Color(0xFF1976D2)
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Register")
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = state.login,
-            onValueChange = { viewModel.onIntent(RegisterIntent.LoginChanged(it)) },
-            label = { Text("Login") },
-            modifier = Modifier.fillMaxWidth()
+        Text(
+            text = "Регистрация",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0D47A1)
+        )
+        Text(
+            text = "Станьте частью CollabMe",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        OutlinedTextField(
-            value = state.email,
-            onValueChange = { viewModel.onIntent(RegisterIntent.EmailChanged(it)) },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = state.password,
-            onValueChange = { viewModel.onIntent(RegisterIntent.PasswordChanged(it)) },
-            label = { Text("Password") },
+        Card(
             modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = state.phone,
-            onValueChange = { viewModel.onIntent(RegisterIntent.PhoneChanged(it)) },
-            label = { Text("Phone (optional)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { viewModel.onIntent(RegisterIntent.Submit) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !state.isLoading
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
-            Text("Register")
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = state.login,
+                    onValueChange = { viewModel.onIntent(RegisterIntent.LoginChanged(it)) },
+                    label = { Text("Логин") },
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF1976D2)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = textFieldColors
+                )
+
+                OutlinedTextField(
+                    value = state.email,
+                    onValueChange = { viewModel.onIntent(RegisterIntent.EmailChanged(it)) },
+                    label = { Text("Email") },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = Color(0xFF1976D2)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = textFieldColors
+                )
+
+                OutlinedTextField(
+                    value = state.password,
+                    onValueChange = { viewModel.onIntent(RegisterIntent.PasswordChanged(it)) },
+                    label = { Text("Пароль") },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF1976D2)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = textFieldColors
+                )
+
+                OutlinedTextField(
+                    value = state.phone,
+                    onValueChange = { viewModel.onIntent(RegisterIntent.PhoneChanged(it)) },
+                    label = { Text("Телефон (необязательно)") },
+                    leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF1976D2)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = textFieldColors
+                )
+
+                state.error?.let {
+                    Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = { viewModel.onIntent(RegisterIntent.Submit) },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    enabled = !state.isLoading,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2))
+                ) {
+                    if (state.isLoading) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("Создать аккаунт", style = MaterialTheme.typography.titleMedium)
+                    }
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
+        TextButton(
             onClick = { viewModel.onIntent(RegisterIntent.OpenLogin) },
-            modifier = Modifier.fillMaxWidth(),
             enabled = !state.isLoading
         ) {
-            Text("Go to login")
-        }
-
-        if (state.isLoading) {
-            Spacer(modifier = Modifier.height(16.dp))
-            CircularProgressIndicator()
-        }
-
-        state.error?.let {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(text = it)
+            Text("Уже есть аккаунт? Войти", color = Color(0xFF1976D2))
         }
     }
 }
