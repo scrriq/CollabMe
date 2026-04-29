@@ -1,23 +1,15 @@
 package com.example.collabmefrontend.presentation.applications.detail
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ApplicationDetailScreen(
@@ -25,24 +17,31 @@ fun ApplicationDetailScreen(
     viewModel: ApplicationDetailViewModel,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
+    onNavigateToProfile: (String) -> Unit // Новый колбэк
 ) {
-
     val state by viewModel.state.collectAsState()
 
+    // Подписка на эффекты навигации из ViewModel
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is ApplicationDetailEffect.NavigateToUserProfile -> {
+                    onNavigateToProfile(effect.userId)
+                }
+            }
+        }
+    }
+
     LaunchedEffect(applicationId) {
-        viewModel.onIntent(
-            ApplicationDetailIntent.Load(applicationId)
-        )
+        viewModel.onIntent(ApplicationDetailIntent.Load(applicationId))
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-
         verticalArrangement = Arrangement.Top
     ) {
-
         Text(
             text = "Application details",
             style = MaterialTheme.typography.headlineMedium
@@ -55,29 +54,24 @@ fun ApplicationDetailScreen(
         }
 
         state.error?.let {
-
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error
-            )
-
+            Text(text = it, color = MaterialTheme.colorScheme.error)
             Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = {
-                    viewModel.onIntent(
-                        ApplicationDetailIntent.Retry
-                    )
-                }
-            ) {
+            Button(onClick = { viewModel.onIntent(ApplicationDetailIntent.Retry) }) {
                 Text("Retry")
             }
         }
 
         state.application?.let { application ->
-
             DetailRow("ID", application.id)
-            DetailRow("User ID", application.userId)
+
+            // Специальная строка для User ID с кнопкой перехода
+            UserDetailRow(
+                userId = application.userId,
+                onUserClick = {
+                    viewModel.onIntent(ApplicationDetailIntent.UserClicked(application.userId))
+                }
+            )
+
             DetailRow("Theme ID", application.themeId)
             DetailRow("Kind ID", application.kindId)
             DetailRow("Status ID", application.statusId)
@@ -85,33 +79,25 @@ fun ApplicationDetailScreen(
             DetailRow("Description", application.description)
             DetailRow("Created at", application.createdAt)
             DetailRow("Updated at", application.updatedAt)
-            DetailRow(
-                "Completed at",
-                application.completedAt ?: "-"
-            )
-
-            DetailRow(
-                "Deleted at",
-                application.deletedAt ?: "-"
-            )
+            DetailRow("Completed at", application.completedAt ?: "-")
+            DetailRow("Deleted at", application.deletedAt ?: "-")
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = {
-                    onEdit(application.id)
-                },
+                onClick = { onEdit(application.id) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Edit")
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.filledTonalButtonColors()
         ) {
             Text("Back")
         }
@@ -119,24 +105,34 @@ fun ApplicationDetailScreen(
 }
 
 @Composable
-private fun DetailRow(
-    label: String,
-    value: String
+private fun UserDetailRow(
+    userId: String,
+    onUserClick: () -> Unit
 ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "User ID", style = MaterialTheme.typography.labelMedium)
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = userId, style = MaterialTheme.typography.bodyMedium)
+            TextButton(onClick = onUserClick) {
+                Text("Смотреть профиль")
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Divider()
+    }
+}
+
+@Composable
+private fun DetailRow(label: String, value: String) {
     Spacer(modifier = Modifier.height(8.dp))
-
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium
-    )
-
-    Text(
-        text = value,
-        style = MaterialTheme.typography.bodyMedium
-    )
-
+    Text(text = label, style = MaterialTheme.typography.labelMedium)
+    Text(text = value, style = MaterialTheme.typography.bodyMedium)
     Spacer(modifier = Modifier.height(8.dp))
-
     Divider()
 }

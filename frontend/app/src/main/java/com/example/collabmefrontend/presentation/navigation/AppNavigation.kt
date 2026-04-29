@@ -36,7 +36,7 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = Routes.PROFILE
+        startDestination = Routes.APPLICATIONS
     ){
         composable(Routes.LOGIN) {
             LoginScreen(
@@ -115,20 +115,13 @@ fun AppNavigation(
         }
 
         composable(Routes.APPLICATIONS) {
-
             ApplicationsScreen(
                 viewModel = applicationsViewModel,
-
                 onNavigateToDetails = { applicationId ->
-                    navController.navigate(
-                        Routes.applicationDetail(applicationId)
-                    )
+                    navController.navigate(Routes.applicationDetail(applicationId))
                 },
-
                 onNavigateToCreate = {
-                    navController.navigate(
-                        Routes.APPLICATION_CREATE
-                    )
+                    navController.navigate(Routes.APPLICATION_CREATE)
                 }
             )
         }
@@ -136,28 +129,24 @@ fun AppNavigation(
         composable(
             route = Routes.APPLICATIONS_DETAILS,
             arguments = listOf(
-                navArgument("applicationId") {
-                    type = NavType.StringType
-                }
+                navArgument("applicationId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-
-            val applicationId =
-                backStackEntry.arguments?.getString("applicationId")
-                    ?: return@composable
+            val applicationId = backStackEntry.arguments?.getString("applicationId")
+                ?: return@composable
 
             ApplicationDetailScreen(
                 applicationId = applicationId,
                 viewModel = applicationDetailViewModel,
-
                 onBack = {
                     navController.popBackStack()
                 },
-
                 onEdit = { id ->
-                    navController.navigate(
-                        Routes.applicationEdit(id)
-                    )
+                    navController.navigate(Routes.applicationEdit(id))
+                },
+                // РЕАЛИЗАЦИЯ ПЕРЕХОДА:
+                onNavigateToProfile = { userId ->
+                    navController.navigate(Routes.publicProfile(userId))
                 }
             )
         }

@@ -7,25 +7,36 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 
 class ApplicationDetailViewModel(
     private val applicationRepository: ApplicationRepository
-) : ViewModel(){
+) : ViewModel() {
     private val _state = MutableStateFlow(ApplicationDetailState())
     val state: StateFlow<ApplicationDetailState> = _state.asStateFlow()
 
+    // Добавляем канал эффектов
+    private val _effect = Channel<ApplicationDetailEffect>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
+
     private var currentApplicationId: String? = null
 
-    fun onIntent(intent: ApplicationDetailIntent){
-        when(intent){
+    fun onIntent(intent: ApplicationDetailIntent) {
+        when (intent) {
             is ApplicationDetailIntent.Load -> {
                 currentApplicationId = intent.applicationId
                 loadApplication(intent.applicationId)
             }
-
             ApplicationDetailIntent.Retry -> {
                 val id = currentApplicationId ?: return
                 loadApplication(id)
+            }
+            // Обработка клика
+            is ApplicationDetailIntent.UserClicked -> {
+                viewModelScope.launch {
+                    _effect.send(ApplicationDetailEffect.NavigateToUserProfile(intent.userId))
+                }
             }
         }
     }
@@ -49,3 +60,4 @@ class ApplicationDetailViewModel(
         }
     }
 }
+
