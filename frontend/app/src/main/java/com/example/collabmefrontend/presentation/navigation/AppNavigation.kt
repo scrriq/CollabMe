@@ -1,10 +1,11 @@
 package com.example.collabmefrontend.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.collabme.presentation.auth.login.LoginScreen
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailScreen
@@ -23,6 +24,8 @@ import com.example.collabmefrontend.presentation.register.RegisterScreen
 
 @Composable
 fun AppNavigation(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel,
     registerViewModel: RegisterViewModel,
     profileViewModel: ProfileViewModel,
@@ -30,22 +33,19 @@ fun AppNavigation(
     applicationDetailViewModel: ApplicationDetailViewModel,
     applicationFormViewModel: ApplicationFormViewModel,
     publicProfileViewModel: PublicProfileViewModel,
+    startDestination: String
 ) {
-
-    val navController = rememberNavController()
-
     NavHost(
         navController = navController,
-        startDestination = Routes.APPLICATIONS
-    ){
+        startDestination = startDestination,
+        modifier = modifier
+    ) {
         composable(Routes.LOGIN) {
             LoginScreen(
                 viewModel = loginViewModel,
                 onNavigateToProfile = {
-                    navController.navigate(Routes.PROFILE) {
-                        popUpTo(Routes.LOGIN) {
-                            inclusive = true
-                        }
+                    navController.navigate(Routes.APPLICATIONS) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 },
                 onNavigateToRegister = {
@@ -62,9 +62,7 @@ fun AppNavigation(
                 },
                 onNavigateToProfile = {
                     navController.navigate(Routes.PROFILE) {
-                        popUpTo(Routes.LOGIN) {
-                            inclusive = true
-                        }
+                        popUpTo(Routes.REGISTER) { inclusive = true }
                     }
                 }
             )
@@ -75,111 +73,68 @@ fun AppNavigation(
                 viewModel = profileViewModel,
                 onNavigateToLogin = {
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.PROFILE) {
-                            inclusive = true
-                        }
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 onNavigateToPublicProfile = { userId ->
-                    navController.navigate(
-                        Routes.publicProfile(userId)
-                    )
+                    navController.navigate(Routes.publicProfile(userId))
                 }
             )
         }
 
         composable(
             route = Routes.PUBLIC_PROFILE,
-            arguments = listOf(
-                navArgument("userId") {
-                    type = NavType.StringType
-                }
-            )
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->
-
-            val userId =
-                backStackEntry.arguments?.getString("userId")
-                    ?: return@composable
-
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
             PublicProfileScreen(
                 viewModel = publicProfileViewModel,
                 userId = userId,
                 isOwnProfile = false,
-                onBack = {
-                    navController.popBackStack()
-                },
-                onEdit = {
-                    navController.navigate(Routes.PROFILE)
-                }
+                onBack = { navController.popBackStack() },
+                onEdit = { navController.navigate(Routes.PROFILE) }
             )
         }
 
         composable(Routes.APPLICATIONS) {
             ApplicationsScreen(
                 viewModel = applicationsViewModel,
-                onNavigateToDetails = { applicationId ->
-                    navController.navigate(Routes.applicationDetail(applicationId))
-                },
-                onNavigateToCreate = {
-                    navController.navigate(Routes.APPLICATION_CREATE)
-                }
+                onNavigateToDetails = { id -> navController.navigate(Routes.applicationDetail(id)) },
+                onNavigateToCreate = { navController.navigate(Routes.APPLICATION_CREATE) }
             )
         }
 
         composable(
             route = Routes.APPLICATIONS_DETAILS,
-            arguments = listOf(
-                navArgument("applicationId") { type = NavType.StringType }
-            )
+            arguments = listOf(navArgument("applicationId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val applicationId = backStackEntry.arguments?.getString("applicationId")
-                ?: return@composable
-
+            val id = backStackEntry.arguments?.getString("applicationId") ?: return@composable
             ApplicationDetailScreen(
-                applicationId = applicationId,
+                applicationId = id,
                 viewModel = applicationDetailViewModel,
-                onBack = {
-                    navController.popBackStack()
-                },
-                onEdit = { id ->
-                    navController.navigate(Routes.applicationEdit(id))
-                },
-                // РЕАЛИЗАЦИЯ ПЕРЕХОДА:
-                onNavigateToProfile = { userId ->
-                    navController.navigate(Routes.publicProfile(userId))
-                }
+                onBack = { navController.popBackStack() },
+                onEdit = { editId -> navController.navigate(Routes.applicationEdit(editId)) },
+                onNavigateToProfile = { userId -> navController.navigate(Routes.publicProfile(userId)) }
             )
         }
 
         composable(Routes.APPLICATION_CREATE) {
-
             ApplicationFormScreen(
                 viewModel = applicationFormViewModel,
                 applicationId = null,
-                onClose = {
-                    navController.popBackStack()
-                }
+                onClose = { navController.popBackStack() }
             )
         }
 
         composable(
             route = Routes.APPLICATION_EDIT,
-            arguments = listOf(
-                navArgument("applicationId") {
-                    type = NavType.StringType
-                }
-            )
+            arguments = listOf(navArgument("applicationId") { type = NavType.StringType })
         ) { backStackEntry ->
-
-            val applicationId =
-                backStackEntry.arguments?.getString("applicationId")
-
+            val id = backStackEntry.arguments?.getString("applicationId")
             ApplicationFormScreen(
                 viewModel = applicationFormViewModel,
-                applicationId = applicationId,
-                onClose = {
-                    navController.popBackStack()
-                }
+                applicationId = id,
+                onClose = { navController.popBackStack() }
             )
         }
     }
