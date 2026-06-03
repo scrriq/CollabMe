@@ -12,6 +12,26 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
       - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  flyway:
+    image: flyway/flyway:10
+    container_name: app-flyway
+    depends_on:
+      db:
+        condition: service_healthy
+    command: -connectRetries=60 migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db:5432/app_db
+      FLYWAY_USER: app_user
+      FLYWAY_PASSWORD: app_password
+      FLYWAY_LOCATIONS: filesystem:/flyway/migrations
+    volumes:
+      - ./db/migrations:/flyway/migrations
 
 volumes:
   postgres_data:

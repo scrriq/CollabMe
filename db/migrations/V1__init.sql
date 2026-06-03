@@ -118,6 +118,45 @@ CREATE INDEX idx_applications_kind_id ON applications(kind_id);
 CREATE INDEX idx_applications_status_id ON applications(status_id);
 CREATE INDEX idx_applications_deleted_at ON applications(deleted_at);
 
+-- Отклики пользователей на заявки (many-to-many: users <-> applications).
+-- Один пользователь может откликнуться на заявку один раз.
+
+CREATE TABLE application_responses (
+    user_id UUID NOT NULL REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    application_id UUID NOT NULL REFERENCES applications(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, application_id)
+);
+
+CREATE INDEX idx_application_responses_user_id ON application_responses(user_id);
+CREATE INDEX idx_application_responses_application_id ON application_responses(application_id);
+
+CREATE OR REPLACE FUNCTION prevent_self_application_response()
+RETURNS trigger AS $$
+DECLARE
+    owner_id UUID;
+BEGIN
+    SELECT user_id INTO owner_id
+    FROM applications
+    WHERE id = NEW.application_id;
+
+    IF owner_id IS NULL THEN
+        RAISE EXCEPTION 'Application not found: %', NEW.application_id;
+    END IF;
+
+    IF NEW.user_id = owner_id THEN
+        RAISE EXCEPTION 'Cannot respond to your own application';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_application_responses_prevent_self
+BEFORE INSERT ON application_responses
+FOR EACH ROW
+EXECUTE FUNCTION prevent_self_application_response();
+
 
 
 CREATE OR REPLACE FUNCTION set_updated_at()
