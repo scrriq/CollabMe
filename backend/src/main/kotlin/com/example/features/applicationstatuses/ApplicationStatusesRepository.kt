@@ -20,4 +20,16 @@ class ApplicationStatusesRepository {
                 )
             }
     }
+
+    fun findAll(): List<ApplicationStatusDto> = transaction{
+        ApplicationStatusesTable
+            .selectAll()
+            .map { row ->
+                ApplicationStatusDto(
+                    id = row[ApplicationStatusesTable.id].toString(),
+                    code = row[ApplicationStatusesTable.code],
+                    title = row[ApplicationStatusesTable.title],
+                )
+            }
+    }
 }

@@ -11,6 +11,9 @@ import java.util.UUID
 
 fun Route.ThemesRoutes(themesService: ThemesService) {
     route("/themes") {
+        get{
+            call.respond(themesService.getAll())
+        }
         get("/{id}") {
             val idParam = call.parameters["id"]
                 ?: throw ValidationException("Missing id parameter")

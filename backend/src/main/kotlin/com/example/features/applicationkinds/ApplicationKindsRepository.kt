@@ -20,4 +20,16 @@ class ApplicationKindsRepository {
                 )
             }
     }
+
+    fun findAll(): List<ApplicationKindDto> = transaction {
+        ApplicationKindsTable
+            .selectAll()
+            .map { row ->
+                ApplicationKindDto(
+                    id = row[ApplicationKindsTable.id].toString(),
+                    code = row[ApplicationKindsTable.code],
+                    title = row[ApplicationKindsTable.title],
+                )
+            }
+    }
 }

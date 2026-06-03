@@ -11,6 +11,10 @@ import java.util.UUID
 
 fun Route.ApplicationKindsRoutes(applicationKindsService: ApplicationKindsService) {
     route("/application-kinds") {
+        get{
+            call.respond(applicationKindsService.getAll())
+        }
+
         get("/{id}") {
             val idParam = call.parameters["id"]
                 ?: throw ValidationException("Missing id parameter")
