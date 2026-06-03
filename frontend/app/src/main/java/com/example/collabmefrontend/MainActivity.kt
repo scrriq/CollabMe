@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
                         ApplicationsViewModel(applicationsRepository)
                     })
                     val applicationDetailViewModel: ApplicationDetailViewModel = viewModel(factory = ViewModelFactory {
-                        ApplicationDetailViewModel(applicationsRepository)
+                        ApplicationDetailViewModel(applicationsRepository, profileRepository)
                     })
                     val applicationFormViewModel: ApplicationFormViewModel = viewModel(factory = ViewModelFactory {
                         ApplicationFormViewModel(applicationsRepository, applicationCatalogRepository)

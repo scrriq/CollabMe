@@ -5,6 +5,7 @@ import com.example.collabmefrontend.domain.model.ApplicationItem
 
 data class ApplicationDetailState(
     val application: ApplicationItem? = null,
+    val authorDisplayName: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
 )

@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.collabmefrontend.core.util.formatApiDateTime
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,8 +118,11 @@ fun ApplicationDetailScreen(
                         Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF1976D2))
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Автор (ID)", style = MaterialTheme.typography.labelMedium)
-                            Text(app.userId, style = MaterialTheme.typography.bodyMedium)
+                            Text("Автор", style = MaterialTheme.typography.labelMedium)
+                            Text(
+                                text = state.authorDisplayName ?: "Автор не указан",
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
                         }
                         TextButton(onClick = { viewModel.onIntent(ApplicationDetailIntent.UserClicked(app.userId)) }) {
                             Text("Профиль", color = Color(0xFF1976D2))
@@ -136,8 +140,8 @@ fun ApplicationDetailScreen(
                         DetailItem("Тип", app.kind.title)
                         DetailItem("Тема", app.theme.name)
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFBBDEFB))
-                        DetailItem("Создано", app.createdAt)
-                        DetailItem("Обновлено", app.updatedAt)
+                        DetailItem("Создано", formatApiDateTime(app.createdAt))
+                        DetailItem("Обновлено", formatApiDateTime(app.updatedAt))
                     }
                 }
             }

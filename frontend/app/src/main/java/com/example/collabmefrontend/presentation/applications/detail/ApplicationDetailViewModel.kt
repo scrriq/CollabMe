@@ -2,21 +2,23 @@ package com.example.collabmefrontend.presentation.applications.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.collabmefrontend.core.util.buildAuthorDisplayName
 import com.example.collabmefrontend.data.repository.ApplicationRepository
+import com.example.collabmefrontend.data.repository.ProfileRepository
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class ApplicationDetailViewModel(
-    private val applicationRepository: ApplicationRepository
+    private val applicationRepository: ApplicationRepository,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ApplicationDetailState())
     val state: StateFlow<ApplicationDetailState> = _state.asStateFlow()
 
-    // Добавляем канал эффектов
     private val _effect = Channel<ApplicationDetailEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
@@ -32,7 +34,6 @@ class ApplicationDetailViewModel(
                 val id = currentApplicationId ?: return
                 loadApplication(id)
             }
-            // Обработка клика
             is ApplicationDetailIntent.UserClicked -> {
                 viewModelScope.launch {
                     _effect.send(ApplicationDetailEffect.NavigateToUserProfile(intent.userId))
@@ -44,20 +45,28 @@ class ApplicationDetailViewModel(
     private fun loadApplication(applicationId: String) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
-            try{
+            try {
                 val application = applicationRepository.getApplicationById(applicationId)
+                val profile = runCatching {
+                    profileRepository.getProfileByUserId(application.userId)
+                }.getOrNull()
+
+                val authorName = profile?.let {
+                    buildAuthorDisplayName(it.firstName, it.lastName)
+                }.orEmpty().ifBlank { null }
+
                 _state.value = _state.value.copy(
                     application = application,
+                    authorDisplayName = authorName,
                     isLoading = false,
-                    error = null
+                    error = null,
                 )
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    error = e.message ?: "Failed to load application"
+                    error = e.message ?: "Не удалось загрузить заявку",
                 )
             }
         }
     }
 }
-
