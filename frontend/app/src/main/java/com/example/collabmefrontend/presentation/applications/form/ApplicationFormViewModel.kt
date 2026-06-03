@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.collabmefrontend.data.remote.dto.ApplicationCreateRequest
 import com.example.collabmefrontend.data.remote.dto.ApplicationPatchRequest
+import com.example.collabmefrontend.data.repository.ApplicationCatalogRepository
 import com.example.collabmefrontend.data.repository.ApplicationRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class ApplicationFormViewModel(
-    private val applicationRepository: ApplicationRepository
+    private val applicationRepository: ApplicationRepository,
+    private val applicationCatalogRepository: ApplicationCatalogRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ApplicationFormState())
@@ -35,25 +37,34 @@ class ApplicationFormViewModel(
     }
 
     private fun load(applicationId: String?) {
-        if (applicationId == null) {
-            _state.value = ApplicationFormState()
-            return
-        }
-
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
 
             try {
+                val themeOptions = runCatching { applicationCatalogRepository.getThemes() }.getOrDefault(emptyList())
+                val kindOptions = runCatching { applicationCatalogRepository.getKinds() }.getOrDefault(emptyList())
+                val statusOptions = runCatching { applicationCatalogRepository.getStatuses() }.getOrDefault(emptyList())
+
+                if (applicationId == null) {
+                    _state.value = ApplicationFormState(
+                        themeOptions = themeOptions,
+                        kindOptions = kindOptions,
+                        statusOptions = statusOptions,
+                    )
+                    return@launch
+                }
+
                 val item = applicationRepository.getApplicationById(applicationId)
-                _state.value = _state.value.copy(
+                _state.value = ApplicationFormState(
                     id = item.id,
                     themeId = item.themeId,
                     kindId = item.kindId,
                     statusId = item.statusId,
                     title = item.title,
                     description = item.description,
-                    isLoading = false,
-                    error = null,
+                    themeOptions = themeOptions,
+                    kindOptions = kindOptions,
+                    statusOptions = statusOptions,
                 )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
@@ -77,7 +88,7 @@ class ApplicationFormViewModel(
             viewModelScope.launch {
                 _effect.send(
                     ApplicationFormEffect.ShowMessage(
-                        "Заполни themeId, kindId, statusId, заголовок и описание"
+                        "Заполните тему, тип, статус, заголовок и описание"
                     )
                 )
             }

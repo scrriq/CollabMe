@@ -20,6 +20,7 @@ import com.example.collabmefrontend.data.remote.api.ApplicationApi
 import com.example.collabmefrontend.data.remote.api.AuthApi
 import com.example.collabmefrontend.data.remote.api.CatalogApi
 import com.example.collabmefrontend.data.remote.api.ProfileApi
+import com.example.collabmefrontend.data.repository.RemoteApplicationCatalogRepository
 import com.example.collabmefrontend.data.repository.RemoteApplicationRepository
 import com.example.collabmefrontend.data.repository.RemoteAuthRepository
 import com.example.collabmefrontend.data.repository.RemoteProfileCatalogRepository
@@ -70,6 +71,7 @@ class MainActivity : ComponentActivity() {
                     val authRepository = remember { RemoteAuthRepository(authApi, tokenStorage) }
                     val profileRepository = remember { RemoteProfileRepository(profileApi, tokenStorage) }
                     val profileCatalogRepository = remember { RemoteProfileCatalogRepository(catalogApi) }
+                    val applicationCatalogRepository = remember { RemoteApplicationCatalogRepository(catalogApi) }
                     val applicationsRepository = remember { RemoteApplicationRepository(applicationsApi) }
 
                     // ViewModels
@@ -88,7 +90,7 @@ class MainActivity : ComponentActivity() {
                         ApplicationDetailViewModel(applicationsRepository)
                     })
                     val applicationFormViewModel: ApplicationFormViewModel = viewModel(factory = ViewModelFactory {
-                        ApplicationFormViewModel(applicationsRepository)
+                        ApplicationFormViewModel(applicationsRepository, applicationCatalogRepository)
                     })
 
                     MainScreen(

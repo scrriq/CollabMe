@@ -1,5 +1,7 @@
 package com.example.collabmefrontend.presentation.applications.form
 
+import com.example.collabmefrontend.data.repository.CatalogOption
+
 data class ApplicationFormState(
     val id: String? = null,
     val themeId: String = "",
@@ -7,6 +9,9 @@ data class ApplicationFormState(
     val statusId: String = "",
     val title: String = "",
     val description: String = "",
+    val themeOptions: List<CatalogOption> = emptyList(),
+    val kindOptions: List<CatalogOption> = emptyList(),
+    val statusOptions: List<CatalogOption> = emptyList(),
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null,

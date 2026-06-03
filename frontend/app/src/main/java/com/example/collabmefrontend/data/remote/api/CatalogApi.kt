@@ -2,7 +2,10 @@ package com.example.collabmefrontend.data.remote.api
 
 import android.util.Log
 import com.example.collabmefrontend.core.network.ApiClient
+import com.example.collabmefrontend.data.remote.dto.ApplicationKindDto
+import com.example.collabmefrontend.data.remote.dto.ApplicationStatusDto
 import com.example.collabmefrontend.data.remote.dto.CityDto
+import com.example.collabmefrontend.data.remote.dto.ThemeDto
 import com.example.collabmefrontend.data.remote.dto.UniversityDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -35,6 +38,36 @@ class CatalogApi(
         }
         if (!response.status.isSuccess()) {
             throw ApiException("Failed to load universities: HTTP ${response.status.value}")
+        }
+        return response.body()
+    }
+
+    suspend fun getThemes(): List<ThemeDto> {
+        val response = client.get("$baseUrl/themes") {
+            accept(ContentType.Application.Json)
+        }
+        if (!response.status.isSuccess()) {
+            throw ApiException("Failed to load themes: HTTP ${response.status.value}")
+        }
+        return response.body()
+    }
+
+    suspend fun getApplicationKinds(): List<ApplicationKindDto> {
+        val response = client.get("$baseUrl/application-kinds") {
+            accept(ContentType.Application.Json)
+        }
+        if (!response.status.isSuccess()) {
+            throw ApiException("Failed to load application kinds: HTTP ${response.status.value}")
+        }
+        return response.body()
+    }
+
+    suspend fun getApplicationStatuses(): List<ApplicationStatusDto> {
+        val response = client.get("$baseUrl/application-statuses") {
+            accept(ContentType.Application.Json)
+        }
+        if (!response.status.isSuccess()) {
+            throw ApiException("Failed to load application statuses: HTTP ${response.status.value}")
         }
         return response.body()
     }
