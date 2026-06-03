@@ -132,9 +132,9 @@ fun ApplicationDetailScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        DetailItem("Статус", app.statusId)
-                        DetailItem("Тип (Kind)", app.kindId)
-                        DetailItem("Тема", app.themeId)
+                        DetailItem("Статус", app.status.title)
+                        DetailItem("Тип", app.kind.title)
+                        DetailItem("Тема", app.theme.name)
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFBBDEFB))
                         DetailItem("Создано", app.createdAt)
                         DetailItem("Обновлено", app.updatedAt)

@@ -1,10 +1,14 @@
 package com.example.features.applications
 
+import com.example.db.tables.ApplicationKindsTable
+import com.example.db.tables.ApplicationStatusesTable
 import com.example.db.tables.ApplicationsTable
+import com.example.db.tables.ThemesTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.innerJoin
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -16,7 +20,7 @@ import java.util.UUID
 class ApplicationsRepository {
 
     fun listVisible(userId: UUID?, excludeCompleted: Boolean): List<ApplicationDto> = transaction {
-        ApplicationsTable
+        applicationsWithRefs()
             .selectAll()
             .where {
                 var expr = ApplicationsTable.deletedAt.isNull()
@@ -33,7 +37,7 @@ class ApplicationsRepository {
     }
 
     fun findVisibleById(id: UUID): ApplicationDto? = transaction {
-        ApplicationsTable
+        applicationsWithRefs()
             .selectAll()
             .where {
                 (ApplicationsTable.id eq id) and ApplicationsTable.deletedAt.isNull()
@@ -44,7 +48,7 @@ class ApplicationsRepository {
     }
 
     fun findVisibleByIdAndUserId(id: UUID, userId: UUID): ApplicationDto? = transaction {
-        ApplicationsTable
+        applicationsWithRefs()
             .selectAll()
             .where {
                 (ApplicationsTable.id eq id) and
@@ -127,6 +131,12 @@ class ApplicationsRepository {
         n > 0
     }
 
+    private fun applicationsWithRefs() =
+        ApplicationsTable
+            .innerJoin(ThemesTable, { ApplicationsTable.themeId }, { ThemesTable.id })
+            .innerJoin(ApplicationKindsTable, { ApplicationsTable.kindId }, { ApplicationKindsTable.id })
+            .innerJoin(ApplicationStatusesTable, { ApplicationsTable.statusId }, { ApplicationStatusesTable.id })
+
     private fun mapRow(row: ResultRow): ApplicationDto =
         ApplicationDto(
             id = row[ApplicationsTable.id].toString(),
@@ -134,6 +144,18 @@ class ApplicationsRepository {
             themeId = row[ApplicationsTable.themeId].toString(),
             kindId = row[ApplicationsTable.kindId].toString(),
             statusId = row[ApplicationsTable.statusId].toString(),
+            theme = ApplicationThemeRef(
+                id = row[ThemesTable.id].toString(),
+                name = row[ThemesTable.name],
+            ),
+            kind = ApplicationTitledRef(
+                id = row[ApplicationKindsTable.id].toString(),
+                title = row[ApplicationKindsTable.title],
+            ),
+            status = ApplicationTitledRef(
+                id = row[ApplicationStatusesTable.id].toString(),
+                title = row[ApplicationStatusesTable.title],
+            ),
             title = row[ApplicationsTable.title],
             description = row[ApplicationsTable.description],
             createdAt = row[ApplicationsTable.createdAt].toString(),

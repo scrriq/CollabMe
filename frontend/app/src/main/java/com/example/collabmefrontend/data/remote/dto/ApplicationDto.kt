@@ -10,12 +10,15 @@ data class ApplicationDto(
     val themeId: String,
     val kindId: String,
     val statusId: String,
+    val theme: ApplicationThemeRefDto,
+    val kind: ApplicationTitledRefDto,
+    val status: ApplicationTitledRefDto,
     val title: String,
     val description: String,
     val createdAt: String,
     val updatedAt: String,
     val completedAt: String? = null,
-    val deletedAt: String? = null
+    val deletedAt: String? = null,
 ) {
     fun toDomain(): ApplicationItem {
         return ApplicationItem(
@@ -24,6 +27,9 @@ data class ApplicationDto(
             themeId = themeId,
             kindId = kindId,
             statusId = statusId,
+            theme = theme.toDomain(),
+            kind = kind.toKindDomain(),
+            status = status.toStatusDomain(),
             title = title,
             description = description,
             createdAt = createdAt,

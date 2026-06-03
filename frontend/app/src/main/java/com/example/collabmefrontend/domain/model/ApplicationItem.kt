@@ -6,10 +6,13 @@ data class ApplicationItem(
     val themeId: String,
     val kindId: String,
     val statusId: String,
+    val theme: ApplicationThemeRef,
+    val kind: ApplicationKindRef,
+    val status: ApplicationStatusRef,
     val title: String,
     val description: String,
     val createdAt: String,
     val updatedAt: String,
     val completedAt: String? = null,
-    val deletedAt: String? = null
+    val deletedAt: String? = null,
 )

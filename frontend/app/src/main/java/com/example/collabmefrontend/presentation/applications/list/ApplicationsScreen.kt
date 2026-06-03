@@ -106,7 +106,7 @@ fun ApplicationsScreen(
                     ApplicationCard(
                         title = application.title,
                         description = application.description,
-                        statusId = application.statusId,
+                        statusLabel = application.status.title,
                         onClick = {
                             viewModel.onIntent(ApplicationsIntent.ApplicationClicked(application.id))
                         }
@@ -121,7 +121,7 @@ fun ApplicationsScreen(
 private fun ApplicationCard(
     title: String,
     description: String,
-    statusId: String,
+    statusLabel: String,
     onClick: () -> Unit
 ) {
     Card(
@@ -167,7 +167,7 @@ private fun ApplicationCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 SuggestionChip(
                     onClick = {},
-                    label = { Text(statusId, style = MaterialTheme.typography.labelSmall) },
+                    label = { Text(statusLabel, style = MaterialTheme.typography.labelSmall) },
                     colors = SuggestionChipDefaults.suggestionChipColors(containerColor = Color.White)
                 )
             }
