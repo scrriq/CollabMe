@@ -17,9 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 class ProfileViewModel(
     private val profileRepository: ProfileRepository,
@@ -31,8 +29,8 @@ class ProfileViewModel(
     private val _effect = Channel<ProfileEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
-    fun onIntent(intent: ProfileIntent){
-        when(intent){
+    fun onIntent(intent: ProfileIntent) {
+        when (intent) {
             ProfileIntent.Load -> load()
             is ProfileIntent.FirstNameChanged -> _state.value = _state.value.copy(firstName = intent.value, error = null)
             is ProfileIntent.LastNameChanged -> _state.value = _state.value.copy(lastName = intent.value, error = null)
@@ -40,7 +38,8 @@ class ProfileViewModel(
             is ProfileIntent.BirthDateChanged -> _state.value = _state.value.copy(birthDate = intent.value, error = null)
             is ProfileIntent.GenderChanged -> _state.value = _state.value.copy(gender = intent.value ?: "", error = null)
             is ProfileIntent.CityIdChanged -> _state.value = _state.value.copy(cityId = intent.value ?: "", error = null)
-            is ProfileIntent.UniversityIdChanged -> _state.value = _state.value.copy(universityId = intent.value?: "", error = null)
+            is ProfileIntent.UniversityIdChanged -> _state.value = _state.value.copy(universityId = intent.value ?: "", error = null)
+            is ProfileIntent.DirectionChanged -> _state.value = _state.value.copy(directionId = intent.value ?: "", error = null)
             is ProfileIntent.AboutChanged -> _state.value = _state.value.copy(about = intent.value, error = null)
             is ProfileIntent.AvatarUrlChanged -> _state.value = _state.value.copy(avatarUrl = intent.value, error = null)
 
@@ -58,9 +57,10 @@ class ProfileViewModel(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
 
-            try{
+            try {
                 val cityOptions = runCatching { profileCatalogRepository.getCities() }.getOrDefault(emptyList())
                 val universityOptions = runCatching { profileCatalogRepository.getUniversities() }.getOrDefault(emptyList())
+                val directionOptions = runCatching { profileCatalogRepository.getDirections() }.getOrDefault(emptyList())
                 val user = profileRepository.getMyProfileOrNull()
                 if (user == null) {
                     _state.value = _state.value.copy(
@@ -74,11 +74,13 @@ class ProfileViewModel(
                         gender = "",
                         cityId = "",
                         universityId = "",
+                        directionId = "",
                         about = "",
                         avatarUrl = "",
                         socialLinks = listOf(SocialLinkUiModel()),
                         cityOptions = cityOptions,
                         universityOptions = universityOptions,
+                        directionOptions = directionOptions,
                         error = null
                     )
                     return@launch
@@ -93,15 +95,17 @@ class ProfileViewModel(
                     gender = user.gender ?: "",
                     cityId = user.cityId ?: "",
                     universityId = user.universityId ?: "",
+                    directionId = user.directionId ?: "",
                     about = user.about ?: "",
                     avatarUrl = user.avatarUrl ?: "",
                     socialLinks = user.socialLinks.toSocialLinksUiModel(),
                     cityOptions = cityOptions,
                     universityOptions = universityOptions,
+                    directionOptions = directionOptions,
                     isFirstRegistration = false,
                     error = null
                 )
-            }catch(e: Exception){
+            } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
                     error = e.message ?: "Failed to load profile"
@@ -127,9 +131,6 @@ class ProfileViewModel(
 
             _state.value = current.copy(isSaving = true, error = null)
 
-
-
-
             try {
                 val saved = if (current.isFirstRegistration) {
                     profileRepository.createMyProfile(
@@ -140,6 +141,7 @@ class ProfileViewModel(
                         gender = current.gender.trim().takeIf { it.isNotBlank() },
                         cityId = current.cityId.trim().takeIf { it.isNotBlank() },
                         universityId = current.universityId.trim().takeIf { it.isNotBlank() },
+                        directionId = current.directionId.trim().takeIf { it.isNotBlank() },
                         about = current.about.trim().takeIf { it.isNotBlank() },
                         avatarUrl = current.avatarUrl.trim().takeIf { it.isNotBlank() },
                         socialLinks = socialLinks
@@ -153,6 +155,7 @@ class ProfileViewModel(
                         gender = current.gender.trim().takeIf { it.isNotBlank() },
                         cityId = current.cityId.trim().takeIf { it.isNotBlank() },
                         universityId = current.universityId.trim().takeIf { it.isNotBlank() },
+                        directionId = current.directionId.trim().takeIf { it.isNotBlank() },
                         about = current.about.trim().takeIf { it.isNotBlank() },
                         avatarUrl = current.avatarUrl.trim().takeIf { it.isNotBlank() },
                         socialLinks = socialLinks
@@ -161,6 +164,7 @@ class ProfileViewModel(
 
                 _state.value = _state.value.copy(
                     user = saved,
+                    directionId = saved.directionId ?: current.directionId,
                     isFirstRegistration = false,
                     isSaving = false,
                     error = null,
@@ -184,13 +188,12 @@ class ProfileViewModel(
         }
     }
 
-    private fun logout(){
+    private fun logout() {
         viewModelScope.launch {
             authRepository.logout()
             _effect.send(ProfileEffect.NavigateToLogin)
         }
     }
-
 
     private fun addSocialLink() {
         _state.value = _state.value.copy(

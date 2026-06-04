@@ -10,6 +10,8 @@ data class CatalogOption(
 interface ProfileCatalogRepository {
     suspend fun getCities(): List<CatalogOption>
     suspend fun getUniversities(): List<CatalogOption>
+
+    suspend fun getDirections(): List<CatalogOption>
 }
 
 class RemoteProfileCatalogRepository(
@@ -21,5 +23,9 @@ class RemoteProfileCatalogRepository(
 
     override suspend fun getUniversities(): List<CatalogOption> {
         return catalogApi.getUniversities().map { CatalogOption(id = it.id, label = it.name) }
+    }
+
+    override suspend fun getDirections(): List<CatalogOption> {
+        return catalogApi.getDirections().map { CatalogOption(id = it.id, label = it.name) }
     }
 }

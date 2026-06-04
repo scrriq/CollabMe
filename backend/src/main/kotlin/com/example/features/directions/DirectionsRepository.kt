@@ -1,6 +1,7 @@
 package com.example.features.directions
 
 import com.example.db.tables.DirectionsTable
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
@@ -13,6 +14,17 @@ class DirectionsRepository {
             .limit(1)
             .singleOrNull()
             ?.let { row ->
+                DirectionDto(
+                    id = row[DirectionsTable.id].toString(),
+                    name = row[DirectionsTable.name],
+                )
+            }
+    }
+
+    fun findAll(): List<DirectionDto> = transaction{
+        DirectionsTable
+            .selectAll()
+            .map { row ->
                 DirectionDto(
                     id = row[DirectionsTable.id].toString(),
                     name = row[DirectionsTable.name],

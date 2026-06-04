@@ -57,13 +57,17 @@ class PublicProfileViewModel(
             try {
                 val cities = runCatching { profileCatalogRepository.getCities() }.getOrDefault(emptyList())
                 val universities = runCatching { profileCatalogRepository.getUniversities() }.getOrDefault(emptyList())
+                val directions = runCatching { profileCatalogRepository.getDirections() }.getOrDefault(emptyList())
 
                 val user: UserProfile =
                     profileRepository.getProfileByUserId(userId)
                         ?: throw IllegalStateException("User profile not found")
 
                 val universityText =
-                    universities.firstOrNull { it.id == user.universityId }?.label ?: "University not specified"
+                    universities.firstOrNull { it.id == user.universityId }?.label ?: "Вуз не указан"
+
+                val directionText =
+                    directions.firstOrNull { it.id == user.directionId }?.label ?: "Направление не указано"
 
                 val ageText = user.birthDate
                     ?.takeIf { it.isNotBlank() }
@@ -89,7 +93,7 @@ class PublicProfileViewModel(
                     displayName = displayName,
                     ageText = ageText,
                     universityText = universityText,
-                    professionText = "Android разработчик",
+                    directionText = directionText,
                     descriptionText = descriptionText,
                     contacts = contacts,
                     isLoading = false,

@@ -15,6 +15,7 @@ interface ProfileRepository {
         gender: String?,
         cityId: String?,
         universityId: String?,
+        directionId: String?,
         about: String?,
         avatarUrl: String?,
         socialLinks: JsonObject
@@ -28,6 +29,7 @@ interface ProfileRepository {
         gender: String?,
         cityId: String?,
         universityId: String?,
+        directionId: String?,
         about: String?,
         avatarUrl: String?,
         socialLinks: JsonObject

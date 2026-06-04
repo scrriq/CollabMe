@@ -11,6 +11,9 @@ import java.util.UUID
 
 fun Route.DirectionsRoutes(directionsService: DirectionsService) {
     route("/directions") {
+        get{
+            call.respond(directionsService.getAll())
+        }
         get("/{id}") {
             val idParam = call.parameters["id"]
                 ?: throw ValidationException("Missing id parameter")

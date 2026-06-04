@@ -5,6 +5,7 @@ import com.example.collabmefrontend.core.network.ApiClient
 import com.example.collabmefrontend.data.remote.dto.ApplicationKindDto
 import com.example.collabmefrontend.data.remote.dto.ApplicationStatusDto
 import com.example.collabmefrontend.data.remote.dto.CityDto
+import com.example.collabmefrontend.data.remote.dto.DirectionDto
 import com.example.collabmefrontend.data.remote.dto.ThemeDto
 import com.example.collabmefrontend.data.remote.dto.UniversityDto
 import io.ktor.client.HttpClient
@@ -38,6 +39,16 @@ class CatalogApi(
         }
         if (!response.status.isSuccess()) {
             throw ApiException("Failed to load universities: HTTP ${response.status.value}")
+        }
+        return response.body()
+    }
+
+    suspend fun getDirections(): List<DirectionDto>{
+        val response = client.get("$baseUrl/directions"){
+            accept(ContentType.Application.Json)
+        }
+        if(!response.status.isSuccess()){
+            throw ApiException("Failed to load directions: HTTP ${response.status.value}")
         }
         return response.body()
     }

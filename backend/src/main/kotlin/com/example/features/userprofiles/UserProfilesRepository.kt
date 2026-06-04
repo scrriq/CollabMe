@@ -1,8 +1,10 @@
 package com.example.features.userprofiles
 
+import com.example.db.tables.UserProfileDirectionsTable
 import com.example.db.tables.UserProfilesTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -34,6 +36,7 @@ class UserProfilesRepository {
         gender: String?,
         cityId: UUID?,
         universityId: UUID?,
+        directionId: UUID?,
         about: String?,
         avatarUrl: String?,
         socialLinks: JsonObject,
@@ -77,6 +80,8 @@ class UserProfilesRepository {
             }
         }
 
+        replaceDirection(userId, directionId)
+
         UserProfilesTable
             .selectAll()
             .where { UserProfilesTable.userId eq userId }
@@ -110,6 +115,10 @@ class UserProfilesRepository {
             it[UserProfilesTable.updatedAt] = now
         }
 
+        if (ops.touchDirectionId) {
+            replaceDirection(userId, ops.directionId)
+        }
+
         UserProfilesTable
             .selectAll()
             .where { UserProfilesTable.userId eq userId }
@@ -118,9 +127,29 @@ class UserProfilesRepository {
             .let(::mapRow)
     }
 
-    private fun mapRow(row: ResultRow): UserProfileDto =
-        UserProfileDto(
-            userId = row[UserProfilesTable.userId].toString(),
+    private fun replaceDirection(userId: UUID, directionId: UUID?) {
+        UserProfileDirectionsTable.deleteWhere { UserProfileDirectionsTable.userId eq userId }
+        if (directionId != null) {
+            UserProfileDirectionsTable.insert {
+                it[UserProfileDirectionsTable.userId] = userId
+                it[UserProfileDirectionsTable.directionId] = directionId
+            }
+        }
+    }
+
+    private fun directionIdForUser(userId: UUID): String? =
+        UserProfileDirectionsTable
+            .selectAll()
+            .where { UserProfileDirectionsTable.userId eq userId }
+            .limit(1)
+            .singleOrNull()
+            ?.get(UserProfileDirectionsTable.directionId)
+            ?.toString()
+
+    private fun mapRow(row: ResultRow): UserProfileDto {
+        val userId = row[UserProfilesTable.userId]
+        return UserProfileDto(
+            userId = userId.toString(),
             firstName = row[UserProfilesTable.firstName],
             lastName = row[UserProfilesTable.lastName],
             middleName = row[UserProfilesTable.middleName],
@@ -128,6 +157,7 @@ class UserProfilesRepository {
             gender = row[UserProfilesTable.gender],
             cityId = row[UserProfilesTable.cityId]?.toString(),
             universityId = row[UserProfilesTable.universityId]?.toString(),
+            directionId = directionIdForUser(userId),
             about = row[UserProfilesTable.about],
             avatarUrl = row[UserProfilesTable.avatarUrl],
             socialLinks =
@@ -136,4 +166,5 @@ class UserProfilesRepository {
                 }.getOrElse { buildJsonObject { } },
             updatedAt = row[UserProfilesTable.updatedAt].toString(),
         )
+    }
 }

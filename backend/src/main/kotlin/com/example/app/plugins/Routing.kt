@@ -57,7 +57,7 @@ fun Application.configureRouting() {
     val themesRepository = ThemesRepository()
     val themesService = ThemesService(themesRepository)
     val userProfilesRepository = UserProfilesRepository()
-    val userProfilesService = UserProfilesService(userProfilesRepository)
+    val userProfilesService = UserProfilesService(userProfilesRepository, directionsRepository)
     val applicationsRepository = ApplicationsRepository()
     val applicationsService = ApplicationsService(
         applicationsRepository = applicationsRepository,

@@ -11,6 +11,7 @@ data class UserProfile(
     val gender: String? = null,
     val cityId: String? = null,
     val universityId: String? = null,
+    val directionId: String? = null,
     val about: String? = null,
     val avatarUrl: String? = null,
     val socialLinks: JsonObject,

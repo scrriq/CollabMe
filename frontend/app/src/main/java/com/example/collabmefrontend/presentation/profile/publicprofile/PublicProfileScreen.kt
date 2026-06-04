@@ -1,5 +1,6 @@
 package com.example.collabmefrontend.presentation.profile.publicprofile
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -197,7 +198,7 @@ fun PublicProfileScreen(
                         Spacer(modifier = Modifier.height(10.dp))
 
                         Text(
-                            text = "${state.universityText} | ${state.professionText}",
+                            text = buildUniversityAndDirectionText(state.universityText, state.directionText),
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
                             color = Color(0xFF2E2E2E)
@@ -339,5 +340,16 @@ private fun buildNameAndAgeText(name: String, ageText: String): String {
         "$name, $ageText"
     } else {
         name
+    }
+}
+
+private fun buildUniversityAndDirectionText(universityText: String, directionText: String): String {
+    val university = universityText.takeIf { it.isNotBlank() && !it.startsWith("Вуз не") } ?: ""
+    val direction = directionText.takeIf { it.isNotBlank() && !it.startsWith("Направление не") } ?: ""
+    return when {
+        university.isNotBlank() && direction.isNotBlank() -> "$university | $direction"
+        university.isNotBlank() -> university
+        direction.isNotBlank() -> direction
+        else -> "Вуз и направление не указаны"
     }
 }

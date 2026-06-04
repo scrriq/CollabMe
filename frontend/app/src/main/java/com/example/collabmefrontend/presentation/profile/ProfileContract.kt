@@ -14,11 +14,13 @@ data class ProfileState(
     val gender: String = "",
     val cityId: String = "",
     val universityId: String = "",
+    val directionId: String = "",
     val about: String = "",
     val avatarUrl: String = "",
     val socialLinks: List<SocialLinkUiModel> = listOf(SocialLinkUiModel()),
     val cityOptions: List<CatalogOption> = emptyList(),
     val universityOptions: List<CatalogOption> = emptyList(),
+    val directionOptions: List<CatalogOption> = emptyList(),
     val isFirstRegistration: Boolean = false,
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
@@ -34,6 +36,8 @@ sealed interface ProfileIntent{
     data class GenderChanged(val value: String?) : ProfileIntent
     data class CityIdChanged(val value: String?) : ProfileIntent
     data class UniversityIdChanged(val value: String?) : ProfileIntent
+
+    data class DirectionChanged(val value: String?) : ProfileIntent
     data class AboutChanged(val value: String) : ProfileIntent
     data class AvatarUrlChanged(val value: String) : ProfileIntent
 

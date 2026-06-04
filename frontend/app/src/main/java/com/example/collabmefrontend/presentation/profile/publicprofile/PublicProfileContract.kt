@@ -13,7 +13,7 @@ data class PublicProfileState(
     val displayName: String = "",
     val ageText: String = "",
     val universityText: String = "",
-    val professionText: String = "Android разработчик",
+    val directionText: String = "",
     val descriptionText: String = "",
     val contacts: List<PublicProfileContactUiModel> = emptyList(),
     val isLoading: Boolean = false,

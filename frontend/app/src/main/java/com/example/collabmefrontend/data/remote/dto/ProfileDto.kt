@@ -14,6 +14,7 @@ data class UserProfileDto(
     val gender: String? = null,
     val cityId: String? = null,
     val universityId: String? = null,
+    val directionId: String? = null,
     val about: String? = null,
     val avatarUrl: String? = null,
     val socialLinks: JsonObject,
@@ -29,6 +30,7 @@ data class UserProfilePutRequestDto(
     val gender: String? = null,
     val cityId: String? = null,
     val universityId: String? = null,
+    val directionId: String? = null,
     val about: String? = null,
     val avatarUrl: String? = null,
     val socialLinks: JsonObject = buildJsonObject { }
@@ -43,6 +45,7 @@ data class UserProfilePatchRequestDto(
     val gender: String? = null,
     val cityId: String? = null,
     val universityId: String? = null,
+    val directionId: String? = null,
     val about: String? = null,
     val avatarUrl: String? = null,
     val socialLinks: JsonObject? = null

@@ -39,6 +39,7 @@ class RemoteProfileRepository(
         gender: String?,
         cityId: String?,
         universityId: String?,
+        directionId: String?,
         about: String?,
         avatarUrl: String?,
         socialLinks: JsonObject
@@ -56,6 +57,7 @@ class RemoteProfileRepository(
                 gender = gender,
                 cityId = cityId,
                 universityId = universityId,
+                directionId = directionId,
                 about = about,
                 avatarUrl = avatarUrl,
                 socialLinks = socialLinks
@@ -73,6 +75,7 @@ class RemoteProfileRepository(
         gender: String?,
         cityId: String?,
         universityId: String?,
+        directionId: String?,
         about: String?,
         avatarUrl: String?,
         socialLinks: JsonObject
@@ -90,6 +93,7 @@ class RemoteProfileRepository(
                 gender = gender,
                 cityId = cityId,
                 universityId = universityId,
+                directionId = directionId,
                 about = about,
                 avatarUrl = avatarUrl,
                 socialLinks = socialLinks
@@ -109,6 +113,7 @@ class RemoteProfileRepository(
             gender = gender,
             cityId = cityId,
             universityId = universityId,
+            directionId = directionId,
             about = about,
             avatarUrl = avatarUrl,
             socialLinks = socialLinks,

@@ -2,14 +2,14 @@ package com.example.features.userprofiles
 
 import com.example.app.plugins.NotFoundException
 import com.example.app.plugins.ValidationException
+import com.example.features.directions.DirectionsRepository
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.UUID
 
-// Запуск репозитория профиля с проверкой правил
-
 class UserProfilesService(
-    private val userProfilesRepository: UserProfilesRepository
+    private val userProfilesRepository: UserProfilesRepository,
+    private val directionsRepository: DirectionsRepository,
 ) {
     fun getByUserId(userId: UUID): UserProfileDto? {
         return userProfilesRepository.findByUserId(userId)
@@ -23,6 +23,7 @@ class UserProfilesService(
         val birthDate = request.birthDate?.takeIf { it.isNotBlank() }?.let { parseLocalDate(it) }
         val cityId = request.cityId?.takeIf { it.isNotBlank() }?.let { parseUuid(it, "cityId") }
         val universityId = request.universityId?.takeIf { it.isNotBlank() }?.let { parseUuid(it, "universityId") }
+        val directionId = request.directionId?.takeIf { it.isNotBlank() }?.let { parseDirectionId(it) }
         val gender = request.gender?.trim()?.ifBlank { null }?.let(::validateGender)
 
         return userProfilesRepository.upsert(
@@ -34,6 +35,7 @@ class UserProfilesService(
             gender = gender,
             cityId = cityId,
             universityId = universityId,
+            directionId = directionId,
             about = request.about?.trim()?.ifBlank { null },
             avatarUrl = request.avatarUrl?.trim()?.ifBlank { null },
             socialLinks = request.socialLinks,
@@ -84,6 +86,10 @@ class UserProfilesService(
             val id = request.universityId.takeIf { it.isNotBlank() }?.let { parseUuid(it, "universityId") }
             ops = ops.copy(universityId = id, touchUniversityId = true)
         }
+        if (request.directionId != null) {
+            val id = request.directionId.takeIf { it.isNotBlank() }?.let { parseDirectionId(it) }
+            ops = ops.copy(directionId = id, touchDirectionId = true)
+        }
         if (request.about != null) {
             ops = ops.copy(about = request.about.trim().ifBlank { null }, touchAbout = true)
         }
@@ -110,6 +116,14 @@ class UserProfilesService(
         } catch (_: IllegalArgumentException) {
             throw ValidationException("Invalid UUID for $field")
         }
+
+    private fun parseDirectionId(raw: String): UUID {
+        val id = parseUuid(raw, "directionId")
+        if (directionsRepository.findById(id) == null) {
+            throw ValidationException("directionId not found")
+        }
+        return id
+    }
 
     private fun validateGender(gender: String): String {
         if (gender != "male" && gender != "female") {

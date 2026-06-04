@@ -15,3 +15,9 @@ data class UniversityDto(
     val slug: String,
     val cityId: String? = null,
 )
+
+@Serializable
+data class DirectionDto(
+    val id: String,
+    val name: String
+)

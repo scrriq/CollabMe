@@ -139,6 +139,14 @@ fun ProfileScreen(
                         onSelect = { viewModel.onIntent(ProfileIntent.UniversityIdChanged(it)) },
                         enabled = !state.isSaving
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ProfileDropdownField(
+                        label = "Направление",
+                        options = directionOptionsWithNotStated(state.directionOptions),
+                        selectedValue = state.directionId,
+                        onSelect = { viewModel.onIntent(ProfileIntent.DirectionChanged(it)) },
+                        enabled = !state.isSaving
+                    )
                 }
             }
 
@@ -394,6 +402,13 @@ private fun cityOptionsWithNotStated(options: List<CatalogOption>): List<Pair<St
 }
 
 private fun universityOptionsWithNotStated(options: List<CatalogOption>): List<Pair<String?, String>> {
+    return buildList {
+        add(null to "Не указано")
+        options.forEach { add(it.id to it.label) }
+    }
+}
+
+private fun directionOptionsWithNotStated(options: List<CatalogOption>): List<Pair<String?, String>> {
     return buildList {
         add(null to "Не указано")
         options.forEach { add(it.id to it.label) }

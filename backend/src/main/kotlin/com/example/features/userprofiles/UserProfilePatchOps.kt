@@ -14,6 +14,7 @@ data class UserProfilePatchOps(
     val gender: String? = null,
     val cityId: UUID? = null,
     val universityId: UUID? = null,
+    val directionId: UUID? = null,
     val about: String? = null,
     val avatarUrl: String? = null,
     val socialLinks: JsonObject? = null,
@@ -24,6 +25,7 @@ data class UserProfilePatchOps(
     val touchGender: Boolean = false,
     val touchCityId: Boolean = false,
     val touchUniversityId: Boolean = false,
+    val touchDirectionId: Boolean = false,
     val touchAbout: Boolean = false,
     val touchAvatarUrl: Boolean = false,
     val touchSocialLinks: Boolean = false,
@@ -36,6 +38,7 @@ data class UserProfilePatchOps(
             touchGender ||
             touchCityId ||
             touchUniversityId ||
+            touchDirectionId ||
             touchAbout ||
             touchAvatarUrl ||
             touchSocialLinks
