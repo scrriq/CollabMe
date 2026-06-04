@@ -9,6 +9,7 @@ import io.ktor.server.response.respond
 class NotFoundException(message: String) : RuntimeException(message)
 class ValidationException(message: String) : RuntimeException(message)
 class UnauthorizedException(message: String) : RuntimeException(message)
+class ForbiddenException(message: String) : RuntimeException(message)
 
 fun Application.configureStatusPages() {
     install(StatusPages) {
@@ -38,6 +39,16 @@ fun Application.configureStatusPages() {
                 mapOf(
                     "error" to "UNAUTHORIZED",
                     "message" to (cause.message ?: "Unauthorized")
+                )
+            )
+        }
+
+        exception<ForbiddenException> { call, cause ->
+            call.respond(
+                HttpStatusCode.Forbidden,
+                mapOf(
+                    "error" to "FORBIDDEN",
+                    "message" to (cause.message ?: "Forbidden")
                 )
             )
         }

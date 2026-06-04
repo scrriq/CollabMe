@@ -3,6 +3,9 @@ package com.example.app.plugins
 import com.example.features.applicationkinds.ApplicationKindsRepository
 import com.example.features.applicationkinds.ApplicationKindsRoutes
 import com.example.features.applicationkinds.ApplicationKindsService
+import com.example.features.applicationresponses.ApplicationResponsesRepository
+import com.example.features.applicationresponses.ApplicationResponsesRoutes
+import com.example.features.applicationresponses.ApplicationResponsesService
 import com.example.features.applications.ApplicationsRepository
 import com.example.features.applications.ApplicationsRoutes
 import com.example.features.applications.ApplicationsService
@@ -65,6 +68,11 @@ fun Application.configureRouting() {
         applicationKindsRepository = applicationKindsRepository,
         applicationStatusesRepository = applicationStatusesRepository,
     )
+    val applicationResponsesRepository = ApplicationResponsesRepository()
+    val applicationResponsesService = ApplicationResponsesService(
+        applicationResponsesRepository = applicationResponsesRepository,
+        applicationsRepository = applicationsRepository,
+    )
     val usersRepository = UsersRepository()
     val usersService = UsersService(usersRepository)
 
@@ -79,6 +87,7 @@ fun Application.configureRouting() {
         ThemesRoutes(themesService)
         UserProfilesRoutes(userProfilesService)
         ApplicationsRoutes(applicationsService)
+        ApplicationResponsesRoutes(applicationResponsesService)
         UsersRoutes(usersService)
     }
 }

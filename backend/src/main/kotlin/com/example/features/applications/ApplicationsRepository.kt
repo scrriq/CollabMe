@@ -4,18 +4,11 @@ import com.example.db.tables.ApplicationKindsTable
 import com.example.db.tables.ApplicationStatusesTable
 import com.example.db.tables.ApplicationsTable
 import com.example.db.tables.ThemesTable
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.innerJoin
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.UUID
+import java.util.*
 
 class ApplicationsRepository {
 
@@ -31,6 +24,18 @@ class ApplicationsRepository {
                     expr = expr and ApplicationsTable.completedAt.isNull()
                 }
                 expr
+            }
+            .orderBy(ApplicationsTable.createdAt to SortOrder.DESC)
+            .map(::mapRow)
+    }
+
+    fun listVisibleByIds(ids: List<UUID>): List<ApplicationDto> = transaction {
+        if (ids.isEmpty()) return@transaction emptyList()
+
+        applicationsWithRefs()
+            .selectAll()
+            .where {
+                (ApplicationsTable.id inList ids) and ApplicationsTable.deletedAt.isNull()
             }
             .orderBy(ApplicationsTable.createdAt to SortOrder.DESC)
             .map(::mapRow)
