@@ -13,10 +13,26 @@ class RemoteApplicationRepository(
         return api.getApplications().map { it.toDomain() }
     }
 
+    override suspend fun getMyResponseApplications(): List<ApplicationItem> {
+        return api.getMyResponseApplications().map { it.toDomain() }
+    }
+
     override suspend fun getApplicationById(
         applicationId: String
     ): ApplicationItem {
         return api.getApplicationById(applicationId).toDomain()
+    }
+
+    override suspend fun hasResponded(applicationId: String): Boolean {
+        return api.getResponseStatus(applicationId).responded
+    }
+
+    override suspend fun respondToApplication(applicationId: String): ApplicationItem {
+        return api.respondToApplication(applicationId).toDomain()
+    }
+
+    override suspend fun withdrawResponse(applicationId: String) {
+        api.withdrawResponse(applicationId)
     }
 
     override suspend fun createApplication(

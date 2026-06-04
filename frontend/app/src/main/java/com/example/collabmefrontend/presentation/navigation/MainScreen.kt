@@ -11,6 +11,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
+import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsViewModel
+import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsIntent
 import com.example.collabmefrontend.presentation.applications.form.ApplicationFormViewModel
 import com.example.collabmefrontend.presentation.applications.list.ApplicationsViewModel
 import com.example.collabmefrontend.presentation.login.LoginViewModel
@@ -24,22 +26,22 @@ fun MainScreen(
     registerViewModel: RegisterViewModel,
     profileViewModel: ProfileViewModel,
     applicationsViewModel: ApplicationsViewModel,
+    favoriteApplicationsViewModel: FavoriteApplicationsViewModel,
     applicationDetailViewModel: ApplicationDetailViewModel,
     applicationFormViewModel: ApplicationFormViewModel,
     publicProfileViewModel: PublicProfileViewModel,
-    isUserLoggedIn: Boolean // Передаем состояние из MainActivity или ViewModel
+    isUserLoggedIn: Boolean,
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    // Список экранов, на которых МЫ ХОТИМ видеть BottomBar
     val bottomBarScreens = listOf(
         Routes.APPLICATIONS,
-        Routes.PROFILE
+        Routes.FAVORITES,
+        Routes.PROFILE,
     )
 
-    // Проверяем, нужно ли показывать BottomBar на текущем экране
     val shouldShowBottomBar = currentDestination?.route in bottomBarScreens
 
     Scaffold(
@@ -47,11 +49,12 @@ fun MainScreen(
             if (shouldShowBottomBar) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 8.dp
+                    tonalElevation = 8.dp,
                 ) {
                     val items = listOf(
                         BottomNavItem.Applications,
-                        BottomNavItem.Profile
+                        BottomNavItem.Favorites,
+                        BottomNavItem.Profile,
                     )
                     items.forEach { item ->
                         val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
@@ -60,20 +63,22 @@ fun MainScreen(
                             label = { Text(item.label) },
                             selected = selected,
                             onClick = {
+                                if (item.route == Routes.FAVORITES) {
+                                    favoriteApplicationsViewModel.onIntent(FavoriteApplicationsIntent.Load)
+                                }
                                 navController.navigate(item.route) {
-                                    // Очищаем стек до начала, чтобы не плодить копии экранов
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
                                     }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
-                            }
+                            },
                         )
                     }
                 }
             }
-        }
+        },
     ) { innerPadding ->
         AppNavigation(
             navController = navController,
@@ -82,10 +87,11 @@ fun MainScreen(
             registerViewModel = registerViewModel,
             profileViewModel = profileViewModel,
             applicationsViewModel = applicationsViewModel,
+            favoriteApplicationsViewModel = favoriteApplicationsViewModel,
             applicationDetailViewModel = applicationDetailViewModel,
             applicationFormViewModel = applicationFormViewModel,
             publicProfileViewModel = publicProfileViewModel,
-            startDestination = if (isUserLoggedIn) Routes.APPLICATIONS else Routes.LOGIN
+            startDestination = if (isUserLoggedIn) Routes.APPLICATIONS else Routes.LOGIN,
         )
     }
 }

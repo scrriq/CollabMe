@@ -10,6 +10,8 @@ import androidx.navigation.navArgument
 import com.example.collabme.presentation.auth.login.LoginScreen
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailScreen
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
+import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsScreen
+import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsViewModel
 import com.example.collabmefrontend.presentation.applications.form.ApplicationFormScreen
 import com.example.collabmefrontend.presentation.applications.form.ApplicationFormViewModel
 import com.example.collabmefrontend.presentation.applications.list.ApplicationsScreen
@@ -30,6 +32,7 @@ fun AppNavigation(
     registerViewModel: RegisterViewModel,
     profileViewModel: ProfileViewModel,
     applicationsViewModel: ApplicationsViewModel,
+    favoriteApplicationsViewModel: FavoriteApplicationsViewModel,
     applicationDetailViewModel: ApplicationDetailViewModel,
     applicationFormViewModel: ApplicationFormViewModel,
     publicProfileViewModel: PublicProfileViewModel,
@@ -100,7 +103,14 @@ fun AppNavigation(
             ApplicationsScreen(
                 viewModel = applicationsViewModel,
                 onNavigateToDetails = { id -> navController.navigate(Routes.applicationDetail(id)) },
-                onNavigateToCreate = { navController.navigate(Routes.APPLICATION_CREATE) }
+                onNavigateToCreate = { navController.navigate(Routes.APPLICATION_CREATE) },
+            )
+        }
+
+        composable(Routes.FAVORITES) {
+            FavoriteApplicationsScreen(
+                viewModel = favoriteApplicationsViewModel,
+                onNavigateToDetails = { id -> navController.navigate(Routes.applicationDetail(id)) },
             )
         }
 

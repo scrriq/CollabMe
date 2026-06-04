@@ -27,6 +27,7 @@ import com.example.collabmefrontend.data.repository.RemoteProfileCatalogReposito
 import com.example.collabmefrontend.data.repository.RemoteProfileRepository
 import com.example.collabmefrontend.data.storage.TokenStorage
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
+import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsViewModel
 import com.example.collabmefrontend.presentation.applications.form.ApplicationFormViewModel
 import com.example.collabmefrontend.presentation.applications.list.ApplicationsViewModel
 import com.example.collabmefrontend.presentation.login.LoginViewModel
@@ -86,6 +87,9 @@ class MainActivity : ComponentActivity() {
                     val applicationsViewModel: ApplicationsViewModel = viewModel(factory = ViewModelFactory {
                         ApplicationsViewModel(applicationsRepository)
                     })
+                    val favoriteApplicationsViewModel: FavoriteApplicationsViewModel = viewModel(factory = ViewModelFactory {
+                        FavoriteApplicationsViewModel(applicationsRepository)
+                    })
                     val applicationDetailViewModel: ApplicationDetailViewModel = viewModel(factory = ViewModelFactory {
                         ApplicationDetailViewModel(applicationsRepository, profileRepository)
                     })
@@ -98,6 +102,7 @@ class MainActivity : ComponentActivity() {
                         registerViewModel = registerViewModel,
                         profileViewModel = profileViewModel,
                         applicationsViewModel = applicationsViewModel,
+                        favoriteApplicationsViewModel = favoriteApplicationsViewModel,
                         applicationDetailViewModel = applicationDetailViewModel,
                         applicationFormViewModel = applicationFormViewModel,
                         publicProfileViewModel = publicProfileViewModel,

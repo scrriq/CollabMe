@@ -8,9 +8,17 @@ interface ApplicationRepository {
 
     suspend fun getApplications(): List<ApplicationItem>
 
+    suspend fun getMyResponseApplications(): List<ApplicationItem>
+
     suspend fun getApplicationById(
         applicationId: String
     ): ApplicationItem
+
+    suspend fun hasResponded(applicationId: String): Boolean
+
+    suspend fun respondToApplication(applicationId: String): ApplicationItem
+
+    suspend fun withdrawResponse(applicationId: String)
 
     suspend fun createApplication(
         request: ApplicationCreateRequest

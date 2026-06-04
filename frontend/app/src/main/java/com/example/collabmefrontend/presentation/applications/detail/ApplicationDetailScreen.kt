@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,11 +32,13 @@ fun ApplicationDetailScreen(
     onNavigateToProfile: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(viewModel) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is ApplicationDetailEffect.NavigateToUserProfile -> onNavigateToProfile(effect.userId)
+                is ApplicationDetailEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
             }
         }
     }
@@ -45,6 +48,7 @@ fun ApplicationDetailScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Детали заявки") },
@@ -54,9 +58,11 @@ fun ApplicationDetailScreen(
                     }
                 },
                 actions = {
-                    state.application?.let {
-                        IconButton(onClick = { onEdit(it.id) }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Редактировать")
+                    if (state.isOwner) {
+                        state.application?.let {
+                            IconButton(onClick = { onEdit(it.id) }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Редактировать")
+                            }
                         }
                     }
                 },
@@ -84,7 +90,6 @@ fun ApplicationDetailScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Главная карточка с заголовком
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD)),
@@ -105,7 +110,6 @@ fun ApplicationDetailScreen(
                     }
                 }
 
-                // Инфо о пользователе
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -130,7 +134,6 @@ fun ApplicationDetailScreen(
                     }
                 }
 
-                // Технические детали
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp)
@@ -142,6 +145,48 @@ fun ApplicationDetailScreen(
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFBBDEFB))
                         DetailItem("Создано", formatApiDateTime(app.createdAt))
                         DetailItem("Обновлено", formatApiDateTime(app.updatedAt))
+                    }
+                }
+
+                state.error?.let {
+                    Text(text = it, color = MaterialTheme.colorScheme.error)
+                }
+
+                if (!state.isOwner && state.currentUserId != null) {
+                    if (state.hasResponded) {
+                        OutlinedButton(
+                            onClick = { viewModel.onIntent(ApplicationDetailIntent.WithdrawClicked) },
+                            enabled = !state.isResponseUpdating,
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFD32F2F)),
+                        ) {
+                            if (state.isResponseUpdating) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(22.dp),
+                                    color = Color(0xFFD32F2F),
+                                )
+                            } else {
+                                Text("Убрать из избранного")
+                            }
+                        }
+                    } else {
+                        Button(
+                            onClick = { viewModel.onIntent(ApplicationDetailIntent.RespondClicked) },
+                            enabled = !state.isResponseUpdating,
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2)),
+                        ) {
+                            if (state.isResponseUpdating) {
+                                CircularProgressIndicator(
+                                    color = Color.White,
+                                    modifier = Modifier.size(22.dp),
+                                )
+                            } else {
+                                Text("Откликнуться")
+                            }
+                        }
                     }
                 }
             }
