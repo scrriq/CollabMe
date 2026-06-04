@@ -2,6 +2,7 @@ package com.example.collabmefrontend.data.repository
 
 import com.example.collabmefrontend.data.remote.dto.ApplicationCreateRequest
 import com.example.collabmefrontend.data.remote.dto.ApplicationPatchRequest
+import com.example.collabmefrontend.data.remote.dto.ApplicationResponseUserDto
 import com.example.collabmefrontend.domain.model.ApplicationItem
 
 interface ApplicationRepository {
@@ -19,6 +20,8 @@ interface ApplicationRepository {
     suspend fun respondToApplication(applicationId: String): ApplicationItem
 
     suspend fun withdrawResponse(applicationId: String)
+
+    suspend fun listApplicationResponders(applicationId: String): List<ApplicationResponseUserDto>
 
     suspend fun createApplication(
         request: ApplicationCreateRequest

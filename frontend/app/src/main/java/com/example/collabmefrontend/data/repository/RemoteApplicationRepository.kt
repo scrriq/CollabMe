@@ -35,6 +35,9 @@ class RemoteApplicationRepository(
         api.withdrawResponse(applicationId)
     }
 
+    override suspend fun listApplicationResponders(applicationId: String) =
+        api.getApplicationResponders(applicationId)
+
     override suspend fun createApplication(
         request: ApplicationCreateRequest
     ): ApplicationItem {

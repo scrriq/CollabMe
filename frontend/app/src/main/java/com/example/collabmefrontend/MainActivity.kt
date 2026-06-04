@@ -27,6 +27,7 @@ import com.example.collabmefrontend.data.repository.RemoteProfileCatalogReposito
 import com.example.collabmefrontend.data.repository.RemoteProfileRepository
 import com.example.collabmefrontend.data.storage.TokenStorage
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
+import com.example.collabmefrontend.presentation.applications.responders.ApplicationRespondersViewModel
 import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsViewModel
 import com.example.collabmefrontend.presentation.applications.form.ApplicationFormViewModel
 import com.example.collabmefrontend.presentation.applications.list.ApplicationsViewModel
@@ -93,6 +94,9 @@ class MainActivity : ComponentActivity() {
                     val applicationDetailViewModel: ApplicationDetailViewModel = viewModel(factory = ViewModelFactory {
                         ApplicationDetailViewModel(applicationsRepository, profileRepository)
                     })
+                    val applicationRespondersViewModel: ApplicationRespondersViewModel = viewModel(factory = ViewModelFactory {
+                        ApplicationRespondersViewModel(applicationsRepository)
+                    })
                     val applicationFormViewModel: ApplicationFormViewModel = viewModel(factory = ViewModelFactory {
                         ApplicationFormViewModel(applicationsRepository, applicationCatalogRepository)
                     })
@@ -104,6 +108,7 @@ class MainActivity : ComponentActivity() {
                         applicationsViewModel = applicationsViewModel,
                         favoriteApplicationsViewModel = favoriteApplicationsViewModel,
                         applicationDetailViewModel = applicationDetailViewModel,
+                        applicationRespondersViewModel = applicationRespondersViewModel,
                         applicationFormViewModel = applicationFormViewModel,
                         publicProfileViewModel = publicProfileViewModel,
                         isUserLoggedIn = isUserLoggedIn

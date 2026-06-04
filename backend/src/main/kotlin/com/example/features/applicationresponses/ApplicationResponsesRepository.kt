@@ -2,6 +2,9 @@ package com.example.features.applicationresponses
 
 import com.example.db.tables.ApplicationResponsesTable
 import com.example.db.tables.UserProfilesTable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
@@ -79,6 +82,15 @@ class ApplicationResponsesRepository {
             userId = row[ApplicationResponsesTable.userId].toString(),
             firstName = row.getOrNull(UserProfilesTable.firstName),
             lastName = row.getOrNull(UserProfilesTable.lastName),
+            middleName = row.getOrNull(UserProfilesTable.middleName),
+            socialLinks = row.getOrNull(UserProfilesTable.socialLinks)
+                ?.let(::decodeSocialLinks)
+                ?: buildJsonObject { },
             respondedAt = row[ApplicationResponsesTable.createdAt].toString(),
         )
+
+    private fun decodeSocialLinks(raw: String): JsonObject =
+        runCatching {
+            Json.decodeFromString(JsonObject.serializer(), raw)
+        }.getOrElse { buildJsonObject { } }
 }

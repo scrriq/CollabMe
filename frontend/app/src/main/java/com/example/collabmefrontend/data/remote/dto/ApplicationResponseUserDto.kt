@@ -1,4 +1,4 @@
-package com.example.features.applicationresponses
+package com.example.collabmefrontend.data.remote.dto
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
@@ -11,9 +11,4 @@ data class ApplicationResponseUserDto(
     val middleName: String? = null,
     val socialLinks: JsonObject,
     val respondedAt: String,
-)
-
-@Serializable
-data class ApplicationResponseStatusDto(
-    val responded: Boolean,
 )

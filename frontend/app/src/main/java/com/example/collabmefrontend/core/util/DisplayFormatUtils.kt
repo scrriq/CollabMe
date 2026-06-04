@@ -26,3 +26,17 @@ fun buildAuthorDisplayName(firstName: String, lastName: String): String {
         else -> ""
     }
 }
+
+/** ФИО в порядке: фамилия, имя, отчество. */
+fun buildFullDisplayName(
+    lastName: String?,
+    firstName: String?,
+    middleName: String?,
+): String {
+    val parts = buildList {
+        lastName?.trim()?.takeIf { it.isNotEmpty() }?.let { add(it) }
+        firstName?.trim()?.takeIf { it.isNotEmpty() }?.let { add(it) }
+        middleName?.trim()?.takeIf { it.isNotEmpty() }?.let { add(it) }
+    }
+    return parts.joinToString(" ")
+}

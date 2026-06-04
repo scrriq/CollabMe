@@ -29,7 +29,8 @@ fun ApplicationDetailScreen(
     viewModel: ApplicationDetailViewModel,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
-    onNavigateToProfile: (String) -> Unit
+    onNavigateToProfile: (String) -> Unit,
+    onNavigateToResponders: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -38,6 +39,7 @@ fun ApplicationDetailScreen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is ApplicationDetailEffect.NavigateToUserProfile -> onNavigateToProfile(effect.userId)
+                is ApplicationDetailEffect.NavigateToResponders -> onNavigateToResponders(effect.applicationId)
                 is ApplicationDetailEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
             }
         }
@@ -150,6 +152,17 @@ fun ApplicationDetailScreen(
 
                 state.error?.let {
                     Text(text = it, color = MaterialTheme.colorScheme.error)
+                }
+
+                if (state.isOwner) {
+                    Button(
+                        onClick = { viewModel.onIntent(ApplicationDetailIntent.ViewRespondersClicked) },
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2)),
+                    ) {
+                        Text("Откликнувшиеся")
+                    }
                 }
 
                 if (!state.isOwner && state.currentUserId != null) {

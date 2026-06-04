@@ -4,6 +4,7 @@ import com.example.collabmefrontend.data.remote.dto.ApplicationCreateRequest
 import com.example.collabmefrontend.data.remote.dto.ApplicationDto
 import com.example.collabmefrontend.data.remote.dto.ApplicationPatchRequest
 import com.example.collabmefrontend.data.remote.dto.ApplicationResponseStatusDto
+import com.example.collabmefrontend.data.remote.dto.ApplicationResponseUserDto
 import com.example.collabmefrontend.data.storage.TokenStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -71,6 +72,12 @@ class ApplicationApi(
         client.delete("$baseUrl/applications/$applicationId/responses") {
             applyAuthHeader()
         }
+    }
+
+    suspend fun getApplicationResponders(applicationId: String): List<ApplicationResponseUserDto> {
+        return client.get("$baseUrl/applications/$applicationId/responses") {
+            applyAuthHeader()
+        }.body()
     }
 
     private suspend fun io.ktor.client.request.HttpRequestBuilder.applyAuthHeader() {

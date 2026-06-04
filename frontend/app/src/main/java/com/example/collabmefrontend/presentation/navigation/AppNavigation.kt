@@ -10,6 +10,8 @@ import androidx.navigation.navArgument
 import com.example.collabme.presentation.auth.login.LoginScreen
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailScreen
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
+import com.example.collabmefrontend.presentation.applications.responders.ApplicationRespondersScreen
+import com.example.collabmefrontend.presentation.applications.responders.ApplicationRespondersViewModel
 import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsScreen
 import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsViewModel
 import com.example.collabmefrontend.presentation.applications.form.ApplicationFormScreen
@@ -34,6 +36,7 @@ fun AppNavigation(
     applicationsViewModel: ApplicationsViewModel,
     favoriteApplicationsViewModel: FavoriteApplicationsViewModel,
     applicationDetailViewModel: ApplicationDetailViewModel,
+    applicationRespondersViewModel: ApplicationRespondersViewModel,
     applicationFormViewModel: ApplicationFormViewModel,
     publicProfileViewModel: PublicProfileViewModel,
     startDestination: String
@@ -124,7 +127,23 @@ fun AppNavigation(
                 viewModel = applicationDetailViewModel,
                 onBack = { navController.popBackStack() },
                 onEdit = { editId -> navController.navigate(Routes.applicationEdit(editId)) },
-                onNavigateToProfile = { userId -> navController.navigate(Routes.publicProfile(userId)) }
+                onNavigateToProfile = { userId -> navController.navigate(Routes.publicProfile(userId)) },
+                onNavigateToResponders = { appId ->
+                    navController.navigate(Routes.applicationResponders(appId))
+                },
+            )
+        }
+
+        composable(
+            route = Routes.APPLICATION_RESPONDERS,
+            arguments = listOf(navArgument("applicationId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val appId = backStackEntry.arguments?.getString("applicationId") ?: return@composable
+            ApplicationRespondersScreen(
+                applicationId = appId,
+                viewModel = applicationRespondersViewModel,
+                onBack = { navController.popBackStack() },
+                onNavigateToProfile = { userId -> navController.navigate(Routes.publicProfile(userId)) },
             )
         }
 

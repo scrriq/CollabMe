@@ -41,6 +41,12 @@ class ApplicationDetailViewModel(
                     _effect.send(ApplicationDetailEffect.NavigateToUserProfile(intent.userId))
                 }
             }
+            ApplicationDetailIntent.ViewRespondersClicked -> {
+                val id = currentApplicationId ?: return
+                viewModelScope.launch {
+                    _effect.send(ApplicationDetailEffect.NavigateToResponders(id))
+                }
+            }
         }
     }
 

@@ -16,11 +16,13 @@ object Routes {
     const val APPLICATIONS_DETAILS = "applications/{applicationId}"
     const val APPLICATION_CREATE = "applications/create"
     const val APPLICATION_EDIT = "applications/edit/{applicationId}"
+    const val APPLICATION_RESPONDERS = "applications/{applicationId}/responders"
 
     const val AUTH_CHECK = "auth_check"
 
     fun applicationDetail(applicationId: String) = "applications/$applicationId"
     fun applicationEdit(applicationId: String) = "applications/edit/$applicationId"
+    fun applicationResponders(applicationId: String) = "applications/$applicationId/responders"
     fun publicProfile(userId: String) = "public_profile/$userId"
 }
 

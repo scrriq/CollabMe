@@ -11,6 +11,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
+import com.example.collabmefrontend.presentation.applications.responders.ApplicationRespondersViewModel
 import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsViewModel
 import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsIntent
 import com.example.collabmefrontend.presentation.applications.form.ApplicationFormViewModel
@@ -28,6 +29,7 @@ fun MainScreen(
     applicationsViewModel: ApplicationsViewModel,
     favoriteApplicationsViewModel: FavoriteApplicationsViewModel,
     applicationDetailViewModel: ApplicationDetailViewModel,
+    applicationRespondersViewModel: ApplicationRespondersViewModel,
     applicationFormViewModel: ApplicationFormViewModel,
     publicProfileViewModel: PublicProfileViewModel,
     isUserLoggedIn: Boolean,
@@ -89,6 +91,7 @@ fun MainScreen(
             applicationsViewModel = applicationsViewModel,
             favoriteApplicationsViewModel = favoriteApplicationsViewModel,
             applicationDetailViewModel = applicationDetailViewModel,
+            applicationRespondersViewModel = applicationRespondersViewModel,
             applicationFormViewModel = applicationFormViewModel,
             publicProfileViewModel = publicProfileViewModel,
             startDestination = if (isUserLoggedIn) Routes.APPLICATIONS else Routes.LOGIN,

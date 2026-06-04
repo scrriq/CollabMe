@@ -19,9 +19,11 @@ sealed interface ApplicationDetailIntent {
     data object RespondClicked : ApplicationDetailIntent
     data object WithdrawClicked : ApplicationDetailIntent
     data class UserClicked(val userId: String) : ApplicationDetailIntent
+    data object ViewRespondersClicked : ApplicationDetailIntent
 }
 
 sealed interface ApplicationDetailEffect {
     data class NavigateToUserProfile(val userId: String) : ApplicationDetailEffect
+    data class NavigateToResponders(val applicationId: String) : ApplicationDetailEffect
     data class ShowMessage(val message: String) : ApplicationDetailEffect
 }
