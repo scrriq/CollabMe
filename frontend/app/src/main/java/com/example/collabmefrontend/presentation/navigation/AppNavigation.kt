@@ -2,12 +2,15 @@ package com.example.collabmefrontend.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.collabme.presentation.auth.login.LoginScreen
+import com.example.collabmefrontend.presentation.applications.cards.ApplicationCardsScreen
+import com.example.collabmefrontend.presentation.applications.cards.ApplicationCardsViewModel
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailScreen
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
 import com.example.collabmefrontend.presentation.applications.responders.ApplicationRespondersScreen
@@ -35,6 +38,7 @@ fun AppNavigation(
     profileViewModel: ProfileViewModel,
     applicationsViewModel: ApplicationsViewModel,
     favoriteApplicationsViewModel: FavoriteApplicationsViewModel,
+    applicationCardsViewModel: ApplicationCardsViewModel,
     applicationDetailViewModel: ApplicationDetailViewModel,
     applicationRespondersViewModel: ApplicationRespondersViewModel,
     applicationFormViewModel: ApplicationFormViewModel,
@@ -113,6 +117,13 @@ fun AppNavigation(
         composable(Routes.FAVORITES) {
             FavoriteApplicationsScreen(
                 viewModel = favoriteApplicationsViewModel,
+                onNavigateToDetails = { id -> navController.navigate(Routes.applicationDetail(id)) },
+            )
+        }
+
+        composable(Routes.APPLICATION_CARDS) {
+            ApplicationCardsScreen(
+                viewModel = applicationCardsViewModel,
                 onNavigateToDetails = { id -> navController.navigate(Routes.applicationDetail(id)) },
             )
         }

@@ -10,6 +10,8 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.collabmefrontend.presentation.applications.cards.ApplicationCardsIntent
+import com.example.collabmefrontend.presentation.applications.cards.ApplicationCardsViewModel
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
 import com.example.collabmefrontend.presentation.applications.responders.ApplicationRespondersViewModel
 import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsViewModel
@@ -28,6 +30,7 @@ fun MainScreen(
     profileViewModel: ProfileViewModel,
     applicationsViewModel: ApplicationsViewModel,
     favoriteApplicationsViewModel: FavoriteApplicationsViewModel,
+    applicationCardsViewModel: ApplicationCardsViewModel,
     applicationDetailViewModel: ApplicationDetailViewModel,
     applicationRespondersViewModel: ApplicationRespondersViewModel,
     applicationFormViewModel: ApplicationFormViewModel,
@@ -40,6 +43,7 @@ fun MainScreen(
 
     val bottomBarScreens = listOf(
         Routes.APPLICATIONS,
+        Routes.APPLICATION_CARDS,
         Routes.FAVORITES,
         Routes.PROFILE,
     )
@@ -55,6 +59,7 @@ fun MainScreen(
                 ) {
                     val items = listOf(
                         BottomNavItem.Applications,
+                        BottomNavItem.ApplicationCards,
                         BottomNavItem.Favorites,
                         BottomNavItem.Profile,
                     )
@@ -67,6 +72,9 @@ fun MainScreen(
                             onClick = {
                                 if (item.route == Routes.FAVORITES) {
                                     favoriteApplicationsViewModel.onIntent(FavoriteApplicationsIntent.Load)
+                                }
+                                if (item.route == Routes.APPLICATION_CARDS) {
+                                    applicationCardsViewModel.onIntent(ApplicationCardsIntent.Load)
                                 }
                                 navController.navigate(item.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
@@ -90,6 +98,7 @@ fun MainScreen(
             profileViewModel = profileViewModel,
             applicationsViewModel = applicationsViewModel,
             favoriteApplicationsViewModel = favoriteApplicationsViewModel,
+            applicationCardsViewModel = applicationCardsViewModel,
             applicationDetailViewModel = applicationDetailViewModel,
             applicationRespondersViewModel = applicationRespondersViewModel,
             applicationFormViewModel = applicationFormViewModel,

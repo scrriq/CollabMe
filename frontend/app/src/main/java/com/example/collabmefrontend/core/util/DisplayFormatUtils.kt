@@ -1,5 +1,8 @@
 package com.example.collabmefrontend.core.util
 
+import java.time.LocalDate
+import java.time.Period
+
 /**
  * Преобразует ISO-дату/дату-время с бэкенда (например 2025-05-03T12:00:00Z) в dd-MM-yyyy.
  */
@@ -39,4 +42,16 @@ fun buildFullDisplayName(
         middleName?.trim()?.takeIf { it.isNotEmpty() }?.let { add(it) }
     }
     return parts.joinToString(" ")
+}
+
+fun buildUserInitials(firstName: String, lastName: String): String {
+    val first = firstName.trim().firstOrNull()?.uppercaseChar()?.toString().orEmpty()
+    val last = lastName.trim().firstOrNull()?.uppercaseChar()?.toString().orEmpty()
+    return (first + last).ifBlank { "?" }
+}
+
+fun calculateAgeText(birthDate: String): String {
+    val parsed = runCatching { LocalDate.parse(birthDate) }.getOrNull() ?: return ""
+    val age = Period.between(parsed, LocalDate.now()).years
+    return if (age >= 0) age.toString() else ""
 }

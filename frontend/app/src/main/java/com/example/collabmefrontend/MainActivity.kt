@@ -26,6 +26,7 @@ import com.example.collabmefrontend.data.repository.RemoteAuthRepository
 import com.example.collabmefrontend.data.repository.RemoteProfileCatalogRepository
 import com.example.collabmefrontend.data.repository.RemoteProfileRepository
 import com.example.collabmefrontend.data.storage.TokenStorage
+import com.example.collabmefrontend.presentation.applications.cards.ApplicationCardsViewModel
 import com.example.collabmefrontend.presentation.applications.detail.ApplicationDetailViewModel
 import com.example.collabmefrontend.presentation.applications.responders.ApplicationRespondersViewModel
 import com.example.collabmefrontend.presentation.applications.favorites.FavoriteApplicationsViewModel
@@ -91,6 +92,13 @@ class MainActivity : ComponentActivity() {
                     val favoriteApplicationsViewModel: FavoriteApplicationsViewModel = viewModel(factory = ViewModelFactory {
                         FavoriteApplicationsViewModel(applicationsRepository)
                     })
+                    val applicationCardsViewModel: ApplicationCardsViewModel = viewModel(factory = ViewModelFactory {
+                        ApplicationCardsViewModel(
+                            applicationsRepository,
+                            profileRepository,
+                            profileCatalogRepository,
+                        )
+                    })
                     val applicationDetailViewModel: ApplicationDetailViewModel = viewModel(factory = ViewModelFactory {
                         ApplicationDetailViewModel(applicationsRepository, profileRepository)
                     })
@@ -107,6 +115,7 @@ class MainActivity : ComponentActivity() {
                         profileViewModel = profileViewModel,
                         applicationsViewModel = applicationsViewModel,
                         favoriteApplicationsViewModel = favoriteApplicationsViewModel,
+                        applicationCardsViewModel = applicationCardsViewModel,
                         applicationDetailViewModel = applicationDetailViewModel,
                         applicationRespondersViewModel = applicationRespondersViewModel,
                         applicationFormViewModel = applicationFormViewModel,
