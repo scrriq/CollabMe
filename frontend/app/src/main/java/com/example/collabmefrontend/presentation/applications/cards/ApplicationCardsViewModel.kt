@@ -2,6 +2,7 @@ package com.example.collabmefrontend.presentation.applications.cards
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.collabmefrontend.core.network.NetworkMonitor
 import com.example.collabmefrontend.core.util.buildUserInitials
 import com.example.collabmefrontend.core.util.calculateAgeText
 import com.example.collabmefrontend.data.repository.ApplicationRepository
@@ -20,6 +21,7 @@ class ApplicationCardsViewModel(
     private val applicationRepository: ApplicationRepository,
     private val profileRepository: ProfileRepository,
     private val profileCatalogRepository: ProfileCatalogRepository,
+    private val networkMonitor: NetworkMonitor,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ApplicationCardsState())
     val state: StateFlow<ApplicationCardsState> = _state.asStateFlow()
@@ -39,7 +41,8 @@ class ApplicationCardsViewModel(
 
     private fun load() {
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
+            val isOffline = !networkMonitor.isCurrentlyOnline()
+            _state.value = _state.value.copy(isLoading = true, error = null, isOffline = isOffline)
             try {
                 val allApplications = applicationRepository.getApplications()
                 val respondedIds = applicationRepository.getMyResponseApplications()
@@ -70,11 +73,13 @@ class ApplicationCardsViewModel(
                     cards = cards,
                     currentIndex = 0,
                     isLoading = false,
+                    isOffline = isOffline,
                     error = null,
                 )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
+                    isOffline = isOffline,
                     error = e.message ?: "Не удалось загрузить карточки",
                 )
             }

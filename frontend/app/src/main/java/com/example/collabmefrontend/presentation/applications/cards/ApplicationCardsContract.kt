@@ -17,6 +17,7 @@ data class ApplicationCardsState(
     val currentIndex: Int = 0,
     val isLoading: Boolean = false,
     val isActionInProgress: Boolean = false,
+    val isOffline: Boolean = false,
     val error: String? = null,
 ) {
     val currentCard: ApplicationCardUiModel?
